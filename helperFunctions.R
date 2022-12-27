@@ -161,7 +161,7 @@ generateMetadata <- function(summary_df,
                                        valid_output_type,
                                        valid_genome_annotation)
     }else if(download_method == "experiments"){
-      tg_df_2 <- LoopExperiments(summary_tg_df,
+      tg_df <- LoopExperiments(summary_tg_df,
                                  valid_nucleic_acid_type,
                                  valid_file_format,
                                  valid_output_type,
@@ -432,7 +432,7 @@ getDonorInfo <- function(replicates) {
 #' @param replicates Data.frame containing information about the isogenic
 #'   replicates within the experiment.
 #' @param target_gene Target gene of study.
-#' @param experiment_type Experiment type (e.g. control/case)
+#' @param experiment_type Experiment type (e.g. control/case).
 #'
 #' @return Data.frame containing the information about the biosample and characterization documents.
 #' @export
@@ -557,6 +557,22 @@ LoopExperiments <- function(summary_tg_df,
 }
 
 
+#' Extracts the metadata for a particular experiment
+#'
+#' @param experiment Data.frame containing the information of the experiment as
+#'   obtained from the ENCODE portal.
+#' @param experiment_type Experiment type (e.g. control/case).
+#' @param valid_nucleic_acid_type (Optional) Required nucleic acid type of the
+#'   experiment. Defaults to "polyadenylated mRNA".
+#' @param valid_file_format (Optional) Required output file format of the
+#'   sample. Defaults to "BAM".
+#' @param valid_output_type (Optional) Required output type of the sample.
+#'   Defaults to "alignments".
+#' @param valid_genome_annotation (Optional) Required gene annotation version of
+#'   the sample to extract its metadata. Defaults to "V29".
+#'
+#' @return Data.frame containing the metadata for a particular experiment.
+#' @export 
 extractMetadataExperiment <- function(experiment, 
                                       experiment_type,
                                       valid_nucleic_acid_type,
