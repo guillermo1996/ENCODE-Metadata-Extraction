@@ -36,7 +36,7 @@ ensembl_target_RBPs <- translateGenes(target_RBPs)
 
 metadata_filtered <- metadata %>%
   filter(target_gene %in% target_RBPs, !is.na(gene_quantification_id)) %>%
-  select(target_gene, cell_line, experiment_type, experiment_id, gene_quantification_id) %>%
+  dplyr::select(target_gene, cell_line, experiment_type, experiment_id, gene_quantification_id) %>%
   mutate(path = paste0(main_path, target_gene, "/", experiment_type, "/")) %>%
   left_join(ensembl_target_RBPs, by = c("target_gene" = "hgnc_symbol")) %>%
   relocate(ensembl_gene_id, .before = cell_line)

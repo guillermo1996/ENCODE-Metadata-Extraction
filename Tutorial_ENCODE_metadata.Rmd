@@ -4,17 +4,23 @@ author:
 - name: "Guillermo Rocamora Pérez"
   affiliation: UCL
 date: "`r format(Sys.time(), '%d %B %Y')`"
-output: 
-  bookdown::html_document2:
-    figure_caption: yes
-    code_folding: show
-    theme: paper
-    highlight: kate
-    df_print: paged
+output:
+  md_document:
+    variant: markdown_github
     toc: true
-    toc depth: 3
-    toc_float: true
     number_sections: true
+always_allow_html: true
+# output: 
+#   bookdown::html_document2:
+#     figure_caption: yes
+#     code_folding: show
+#     theme: paper
+#     highlight: kate
+#     df_print: paged
+#     toc: true
+#     toc depth: 3
+#     toc_float: true
+#     number_sections: true
 ---
 <style type="text/css">
 div.main-container {
@@ -27,14 +33,20 @@ library(tidyverse)
 library(ggplot2)
 knitr::opts_chunk$set(echo = T, warning = F, message = F)
 
-prettier_DT <- function(x) DT::datatable(x, options = list(scrollX = TRUE, autoWidth = TRUE), class = "display nowrap")
+#prettier_DT <- function(x) DT::datatable(x, options = list(scrollX = TRUE, autoWidth = TRUE), class = "display nowrap")
 ```
+
+<br>
 
 # Introduction
 
 In this tutorial, we will use [the ENCODE REST API](https://www.encodeproject.org/help/rest-api/) to automate the metadata extraction of experiments related to shRNA knockdown against specific target genes. The functions provided can also be used to extend its functionality (see [appendix 1](#appendix1)).
 
+<br>
+
 # Methods
+
+<br>
 
 ## Prerequisites
 
@@ -59,7 +71,11 @@ logger::log_layout(logger_layout, index = 2)
 source("helperFunctions.R")
 ```
 
+<br>
+
 ## Steps
+
+<br>
 
 ### Step 0: Set the extraction parameters
 
@@ -116,6 +132,8 @@ log_file <- paste0(main_path, "ENCODE_API.log")
 logger::log_appender(logger::appender_file(log_file, append = T), index = 2)
 ```
 
+<br>
+
 ### Step 1: Call the ENCODE API
 
 First, we need to generate an intermediary dataframe containing the information of an ENCODE search. We head to the [ENCODE experiment search portal](https://www.encodeproject.org/search/?type=Experiment), and input the different search filters we are interested in. The following filters are what the program has been tested with (additional search executed in [appendix 1](#appendix1)):
@@ -149,6 +167,8 @@ The returned object contains all the information about the search results:
 names(response_data)
 ```
 
+<br>
+
 ### Step 2: Generate the search summary
 
 Once we have the json object from the ENCODE API, we can extract the relevant information and summarize it in a dataframe. To do so, we execute the function `generateSummary()`, where we specify an output path to store the results in a .tsv file format.
@@ -168,6 +188,8 @@ summary_df %>%
   kableExtra::kbl() %>% 
   kableExtra::kable_classic(full_width = F, html_font = "Cambria")
 ```
+
+<br>
 
 ### Step 3: Retrieval of metadata
 
@@ -217,6 +239,8 @@ The returned dataframe contains the following columns:
 
 More information about the metadata provided by ENCODE can be found in their [*Terms and Definitions*](https://www.encodeproject.org/data-standards/terms/) portal.
 
+<br>
+
 ### Step 4: Add target gene category {#AddCat}
 
 Additionally, we can add a target gene category based on *Van Nostrand et. al.* [A large-scale binding and functional map of human RNA-binding proteins](https://www.nature.com/articles/s41586-020-2077-3) publication, which adds a category for whether it is relevant for *Splicing regulation*, the *Spliceosome* or an *Exon Junction Complex* (not mutually exclusive). If provided with a list of NMD genes, it will also classify the target genes in this category.
@@ -230,13 +254,20 @@ metadata_df <- addTargetGeneCategory(metadata_df,
 
 The final dataframe is stores in a .tsv file if provided in the `output_file` argument.
 
+<br>
+
 # Results 
 
 The final results can be seen in the following table:
 
 ```{r}
-prettier_DT(metadata_df)
+#prettier_DT(metadata_df)
+metadata_df[1:10, ] %>%
+  kableExtra::kbl() %>%
+  kableExtra::kable_classic(full_width = F, html_font = "Cambria")
 ```
+
+<br>
 
 ## Common metadata
 
@@ -258,8 +289,12 @@ Each cellosaurus corresponds to a different tissue:
 Other parameters that are constant across the different samples (independently of the cell line) are: the mapped run type, the lab, the assay, the nucleic acid type (required), the extraction method, the fragmentation method, the size selection method and the strand specificity.
 
 ```{r echo=FALSE}
-metadata_df %>% select(mapped_run_type, lab, assay, nucleic_acid_type, extraction_method, fragmentation_method, size_selection_method, strand_specificity) %>% distinct() %>% prettier_DT
+metadata_df %>% select(mapped_run_type, lab, assay, nucleic_acid_type, extraction_method, fragmentation_method, size_selection_method, strand_specificity) %>% distinct() %>%
+  kableExtra::kbl() %>%
+  kableExtra::kable_classic(full_width = F, html_font = "Cambria")#prettier_DT
 ```
+
+<br>
 
 ## Statistics
 
@@ -273,9 +308,13 @@ If we added the target gene categories, we have a total of `r metadata_df %>% se
 metadata_df %>% select(target_gene, Splicing_regulation, Spliceosome, Exon_junction_complex, NMD) %>% distinct() %>% filter(if_any(-c(target_gene), ~ . != 0)) %>% pull(target_gene)
 ```
 
+<br>
+
 # Conclusions
 
 With the developed script, it is possible to automate the ENCODE RBP metadata extraction using the [the ENCODE REST API](https://www.encodeproject.org/help/rest-api/). It is also proven that the samples share relevant aspects to allow their direct comparison.
+
+<br>
 
 # Appendix 1: CRISPR metadata download {#appendix1}
 
@@ -334,6 +373,8 @@ metadata_df <- addTargetGeneCategory(metadata_df,
                                      input_target_gene_NMD,
                                      output_metadata)
 ```
+
+<br>
 
 # Session info
 
