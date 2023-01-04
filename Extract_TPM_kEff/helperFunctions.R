@@ -28,8 +28,8 @@ createDirectories <- function(target_RBPs,
 #' @param metadata_filtered Data.frame containing the information required to
 #'   download the gene quantifications per sample.
 #' @param download_cores (Optional) Number of cores to use to download. Defaults to 1.
-#' @param overwrite_results (Optional) Whether to redownload already found files. Defaults to FALSE.
-#' @param silent (Optinal) Whether to print progress bar of the download process. Defaults to FALSE.
+#' @param overwrite_results (Optional) Whether to download already found files. Defaults to FALSE.
+#' @param silent (Optional) Whether to print progress bar of the download process. Defaults to FALSE.
 #'
 #' @return Data.frame with the information of the downloaded files.
 #' @export

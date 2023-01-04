@@ -30,6 +30,7 @@ h1{
   font-size: 24pt;
 }
 </style>
+
 ```{r setup, include = FALSE}
 shhh <- suppressPackageStartupMessages
 shhh(library(kableExtra))

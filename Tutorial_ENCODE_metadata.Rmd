@@ -5,22 +5,21 @@ author:
   affiliation: UCL
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
+  bookdown::html_document2:
+    figure_caption: yes
+    code_folding: show
+    theme: paper
+    highlight: kate
+    df_print: paged
+    toc: true
+    toc depth: 3
+    toc_float: true
+    number_sections: true
   md_document:
     variant: markdown_github
     toc: true
     number_sections: true
 always_allow_html: true
-# output: 
-#   bookdown::html_document2:
-#     figure_caption: yes
-#     code_folding: show
-#     theme: paper
-#     highlight: kate
-#     df_print: paged
-#     toc: true
-#     toc depth: 3
-#     toc_float: true
-#     number_sections: true
 ---
 <style type="text/css">
 div.main-container {
@@ -33,7 +32,7 @@ library(tidyverse)
 library(ggplot2)
 knitr::opts_chunk$set(echo = T, warning = F, message = F)
 
-#prettier_DT <- function(x) DT::datatable(x, options = list(scrollX = TRUE, autoWidth = TRUE), class = "display nowrap")
+prettier_DT <- function(x) DT::datatable(x, options = list(scrollX = TRUE, autoWidth = TRUE), class = "display nowrap")
 ```
 
 <br>
@@ -261,10 +260,10 @@ The final dataframe is stores in a .tsv file if provided in the `output_file` ar
 The final results can be seen in the following table:
 
 ```{r}
-#prettier_DT(metadata_df)
-metadata_df[1:10, ] %>%
-  kableExtra::kbl() %>%
-  kableExtra::kable_classic(full_width = F, html_font = "Cambria")
+prettier_DT(metadata_df)
+# metadata_df[1:10, ] %>%
+#   kableExtra::kbl() %>%
+#   kableExtra::kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 <br>
@@ -289,9 +288,9 @@ Each cellosaurus corresponds to a different tissue:
 Other parameters that are constant across the different samples (independently of the cell line) are: the mapped run type, the lab, the assay, the nucleic acid type (required), the extraction method, the fragmentation method, the size selection method and the strand specificity.
 
 ```{r echo=FALSE}
-metadata_df %>% select(mapped_run_type, lab, assay, nucleic_acid_type, extraction_method, fragmentation_method, size_selection_method, strand_specificity) %>% distinct() %>%
-  kableExtra::kbl() %>%
-  kableExtra::kable_classic(full_width = F, html_font = "Cambria")#prettier_DT
+metadata_df %>% select(mapped_run_type, lab, assay, nucleic_acid_type, extraction_method, fragmentation_method, size_selection_method, strand_specificity) %>% distinct() %>% prettier_DT()
+  # kableExtra::kbl() %>%
+  # kableExtra::kable_classic(full_width = F, html_font = "Cambria")#prettier_DT
 ```
 
 <br>
