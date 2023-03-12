@@ -49,24 +49,26 @@ generateSummary <- function(response_data,
     gene_silencing_series <- sapply(experiment$related_series, function(x) x$accession)
     if(length(gene_silencing_series) > 1){
       logger::log_warn("More than one gene silencing series found for target gene ", target_gene, " and biosample ", biosample_ontology)
-      gene_silencing_series <- gene_silencing_series[which(sapply(experiment$related_series[[1]]$`@type`, function(x) "GeneSilencingSeries" %in% x))] 
+      gene_silencing_series <- gene_silencing_series[which(sapply(experiment$related_series[[1]]$`@type`, 
+                                                                  function(x) "GeneSilencingSeries" %in% x))] 
     }
     
-    tmp_df <- tibble(target_gene = target_gene,
-                     experiment_id = sample_id,
-                     cell_line = biosample_ontology,
-                     gene_silencing_series = gene_silencing_series)
+    tmp_df <- tibble::tibble(target_gene = target_gene,
+                             experiment_id = sample_id,
+                             cell_line = biosample_ontology,
+                             gene_silencing_series = gene_silencing_series)
     summary_df <- rbind(summary_df, tmp_df)
   }
   
-  summary_df <- summary_df %>% arrange(target_gene, cell_line)
+  summary_df <- summary_df %>% 
+    dplyr::arrange(target_gene, cell_line)
   
   if(!is.null(output_file)){
     write.table(summary_df, output_file, sep = "\t", row.names = F)
   }
   
   if(!is.null(valid_target_genes)){
-    summary_df <- summary_df %>% filter(target_gene %in% valid_target_genes)
+    summary_df <- summary_df %>% dplyr::filter(target_gene %in% valid_target_genes)
   }
   
   return(summary_df)
@@ -120,7 +122,9 @@ generateMetadata <- function(summary_df,
   ## output file and extract the previous information from it.
   if(output_file == "") overwrite_db = T
   if(!overwrite_db & file.exists(output_file)){
-    df_previous <- read.csv(output_file, sep = "\t") %>% as_tibble() %>% select(-any_of(c("Splicing_regulation", "Spliceosome", "Exon_junction_complex", "NMD")))
+    df_previous <- read.csv(output_file, sep = "\t") %>% 
+      tibble::as_tibble() %>% 
+      dplyr::select(-any_of(c("Splicing_regulation", "Spliceosome", "Exon_junction_complex", "NMD")))
   }else{
     df_previous <- tibble() 
     overwrite_db = T
@@ -128,11 +132,11 @@ generateMetadata <- function(summary_df,
   
   ## Get the valid target genes by cell lines
   valid_target_genes <- summary_df %>% 
-    group_by(target_gene) %>%
-    summarise(cell_lines = list(cell_line))%>%
-    rowwise %>%
-    filter(all(required_cell_lines %in% cell_lines)) %>%
-    pull(target_gene)
+    dplyr::group_by(target_gene) %>%
+    dplyr::summarise(cell_lines = list(cell_line))%>%
+    dplyr::rowwise() %>%
+    dplyr::filter(all(required_cell_lines %in% cell_lines)) %>%
+    dplyr::pull(target_gene)
   
   metadata_df <- tibble()
   ## Loop through every target gene
@@ -141,14 +145,14 @@ generateMetadata <- function(summary_df,
     logger::log_info("Starting target gene ", iter_target_gene, ":")
     
     ## Local target gene information
-    summary_tg_df <- summary_df %>% filter(target_gene == iter_target_gene)
+    summary_tg_df <- summary_df %>% dplyr::filter(target_gene == iter_target_gene)
     
     ## If we find a total of 8 entries in the previous search, we skip this
     ## target gene. 
     if(!overwrite_db){
-      if (df_previous %>% filter(target_gene == iter_target_gene) %>% nrow() == 8){
+      if (df_previous %>% dplyr::filter(target_gene == iter_target_gene) %>% nrow() == 8){
         logger::log_info("\t Already found in output file.")
-        metadata_df <- rbind(metadata_df, df_previous %>% filter(target_gene == iter_target_gene))
+        metadata_df <- rbind(metadata_df, df_previous %>% dplyr::filter(target_gene == iter_target_gene))
         next
       }
     }
@@ -172,8 +176,8 @@ generateMetadata <- function(summary_df,
     
     ## Add final information and sort the columns
     tg_df <- tg_df %>%
-      mutate(target_gene = iter_target_gene, .before = cell_line) %>%
-      filter(nucleic_acid_type == valid_nucleic_acid_type)
+      dplyr::mutate(target_gene = iter_target_gene, .before = cell_line) %>%
+      dplyr::filter(nucleic_acid_type == valid_nucleic_acid_type)
     
     column_order <- c("target_gene", "experiment_type", "cell_line", 
                       "gene_silencing_series", "experiment_id", 
@@ -184,7 +188,7 @@ generateMetadata <- function(summary_df,
                       "mapped_run_type", "lab", "assay", "cellosaurus")
     
     tg_df <- tg_df %>% 
-      select(c(intersect(column_order, names(.)), setdiff(names(.), column_order)))
+      dplyr::select(c(intersect(column_order, names(.)), setdiff(names(.), column_order)))
     
     ## If the required cell lines are not found, ignore the target gene
     if(!all.equal(tg_df$cell_line %>% unique %>% sort, required_cell_lines %>% sort)){
@@ -250,7 +254,8 @@ LoopGeneSilencingSeries <- function(summary_tg_df,
       
       ## Main metadata
       experiment_sample_files <- getSampleFiles(experiment$files[[1]], valid_file_format, valid_output_type, valid_genome_annotation)
-      if(experiment_additional_info$nucleic_acid_type != valid_nucleic_acid_type) return(cbind(experiment_sample_files, experiment_additional_info))
+      if(experiment_additional_info$nucleic_acid_type != valid_nucleic_acid_type) 
+        return(cbind(experiment_sample_files, experiment_additional_info))
       
       ## Other metadata
       experiment_rin <- getRin(experiment$replicates[[1]])
@@ -262,12 +267,13 @@ LoopGeneSilencingSeries <- function(summary_tg_df,
       
       ## Combine all information
       experiment_combined <- experiment_sample_files %>% 
-        left_join(experiment_rin, by = "bio_rep") %>%
-        left_join(experiment_read_depth, by = "bio_rep") %>%
-        left_join(experiment_donor_info, by = "bio_rep") %>% 
-        left_join(experiment_gene_quantifications %>% select(gene_quantification_id, bio_rep), by = "bio_rep") %>%
-        left_join(experiment_documents, by = "bio_rep") %>%
-        mutate(experiment_type = experiment_type, experiment_id = experiment_id, experiment_doi = experiment_doi, .before = "bio_rep") %>%
+        dplyr::left_join(experiment_rin, by = "bio_rep") %>%
+        dplyr::left_join(experiment_read_depth, by = "bio_rep") %>%
+        dplyr::left_join(experiment_donor_info, by = "bio_rep") %>% 
+        dplyr::left_join(experiment_gene_quantifications %>% dplyr::select(gene_quantification_id, bio_rep), by = "bio_rep") %>%
+        dplyr::left_join(experiment_documents, by = "bio_rep") %>%
+        dplyr::mutate(experiment_type = experiment_type, experiment_id = experiment_id, experiment_doi = experiment_doi, 
+                      .before = "bio_rep") %>%
         cbind(experiment_additional_info)
       
       return(experiment_combined)
@@ -275,8 +281,8 @@ LoopGeneSilencingSeries <- function(summary_tg_df,
     
     ## Add the relevant information
     gss_df <- gss_df %>%
-      mutate(cell_line = gss_cell_line, 
-             gene_silencing_series = gss_id, .before = sample_id)
+      dplyr::mutate(cell_line = gss_cell_line, 
+                    gene_silencing_series = gss_id, .before = sample_id)
   }
   
   return(tg_df)
@@ -316,27 +322,54 @@ getExperimentType <- function(related_dataset,
 #' @export
 getAdditionalInformation <- function(related_dataset){
   sample_lab <- related_dataset$lab.title
-  if(is.null(sample_lab)) 
+  if(is.null(sample_lab)){
     sample_lab <- related_dataset$lab$title
+  }
   sample_assay <- related_dataset$assay_term_name
-  sample_cellosaurus <- related_dataset$biosample_ontology.dbxrefs %>% unlist %>% unique
-  if(is.null(sample_cellosaurus)) 
-    sample_cellosaurus <- related_dataset$biosample_ontology$dbxrefs %>% unlist %>% unique
+  sample_cellosaurus <- related_dataset$biosample_ontology.dbxrefs %>% 
+    unlist() %>% 
+    unique()
+  if(is.null(sample_cellosaurus)){
+    sample_cellosaurus <- related_dataset$biosample_ontology$dbxrefs %>% 
+      unlist() %>% 
+      unique()
+  }
   
-  sample_nucleic_acid_type <- related_dataset$replicates %>% data.frame() %>% as_tibble() %>% pull(library.nucleic_acid_term_name) %>% unique
-  sample_extraction_method <- related_dataset$replicates %>% data.frame() %>% as_tibble() %>% pull(library.extraction_method) %>% unique
-  sample_fragmentation_method <- related_dataset$replicates %>% data.frame() %>% as_tibble() %>% pull(library.fragmentation_methods) %>% unlist %>% unique
-  sample_size_selection_method <- related_dataset$replicates %>% data.frame() %>% as_tibble() %>% pull(library.library_size_selection_method) %>% unique
-  sample_strand_specificity <- related_dataset$replicates %>% data.frame() %>% as_tibble() %>% pull(library.strand_specificity) %>% unique
+  sample_nucleic_acid_type <- related_dataset$replicates %>% 
+    data.frame() %>% 
+    tibble::as_tibble() %>% 
+    dplyr::pull(library.nucleic_acid_term_name) %>% 
+    unique()
+  sample_extraction_method <- related_dataset$replicates %>% 
+    data.frame() %>% 
+    tibble::as_tibble() %>% 
+    dplyr::pull(library.extraction_method) %>% 
+    unique()
+  sample_fragmentation_method <- related_dataset$replicates %>% 
+    data.frame() %>% 
+    tibble::as_tibble() %>% 
+    dplyr::pull(library.fragmentation_methods) %>% 
+    unlist() %>% 
+    unique()
+  sample_size_selection_method <- related_dataset$replicates %>% 
+    data.frame() %>% 
+    tibble::as_tibble() %>% 
+    dplyr::pull(library.library_size_selection_method) %>% 
+    unique()
+  sample_strand_specificity <- related_dataset$replicates %>% 
+    data.frame() %>% 
+    tibble::as_tibble() %>% 
+    dplyr::pull(library.strand_specificity) %>% 
+    unique()
   
-  tibble(lab = sample_lab,
-         assay = sample_assay,
-         cellosaurus = sample_cellosaurus,
-         nucleic_acid_type = sample_nucleic_acid_type,
-         extraction_method = sample_extraction_method,
-         fragmentation_method = sample_fragmentation_method,
-         size_selection_method = sample_size_selection_method,
-         strand_specificity = sample_strand_specificity) %>%
+  tibble::tibble(lab = sample_lab,
+                 assay = sample_assay,
+                 cellosaurus = sample_cellosaurus,
+                 nucleic_acid_type = sample_nucleic_acid_type,
+                 extraction_method = sample_extraction_method,
+                 fragmentation_method = sample_fragmentation_method,
+                 size_selection_method = sample_size_selection_method,
+                 strand_specificity = sample_strand_specificity) %>%
     return()
 }
 
@@ -358,10 +391,10 @@ getSampleFiles <- function(files,
                            valid_output_type = "alignments",
                            valid_genome_annotation = "V29") {
   sample_files_info <- files %>% 
-    filter(file_format == valid_file_format) %>%
-    filter(output_type == valid_output_type) %>%
-    filter(genome_annotation == valid_genome_annotation) %>%
-    select(accession, biological_replicates, file_format, output_type, genome_annotation, technical_replicates, mapped_run_type) %>%
+    dplyr::filter(file_format == valid_file_format) %>%
+    dplyr::filter(output_type == valid_output_type) %>%
+    dplyr::filter(genome_annotation == valid_genome_annotation) %>%
+    dplyr::select(accession, biological_replicates, file_format, output_type, genome_annotation, technical_replicates, mapped_run_type) %>%
     tidyr::unnest(c(biological_replicates, technical_replicates)) %>%
     dplyr::rename("bio_rep" = "biological_replicates",
                   "tech_rep" = "technical_replicates",
@@ -381,9 +414,12 @@ getSampleFiles <- function(files,
 getRin <- function(replicates) {
   if(!"library.rna_integrity_number" %in% names(replicates)){
     logger::log_warn("\t\t\t No RIN found. Defaulted to NA.")
-    rin_info <- replicates %>% select(biological_replicate_number) %>% mutate(rin = NA)
+    rin_info <- replicates %>% 
+      dplyr::select(biological_replicate_number) %>% 
+      dplyr::mutate(rin = NA)
   }else{
-    rin_info <- replicates %>% select(biological_replicate_number, library.rna_integrity_number)
+    rin_info <- replicates %>% 
+      dplyr::select(biological_replicate_number, library.rna_integrity_number)
   }
   names(rin_info) <- c("bio_rep", "rin")
   
@@ -402,10 +438,10 @@ getRin <- function(replicates) {
 getReadDepth <- function(analyses,
                          valid_genome_annotation = "V29") {
   read_depth_info <- analyses %>% 
-    filter(genome_annotation == valid_genome_annotation) %>%
-    pull(`quality_metrics_report.Read depth`) %>%
+    dplyr::filter(genome_annotation == valid_genome_annotation) %>%
+    dplyr::pull(`quality_metrics_report.Read depth`) %>%
     magrittr::extract2(1) %>% 
-    select(biological_replicates, metric) %>%
+    dplyr::select(biological_replicates, metric) %>%
     tidyr::unnest(biological_replicates)
   names(read_depth_info) <- c("bio_rep", "read_depth")
   
@@ -421,7 +457,7 @@ getReadDepth <- function(analyses,
 #' @export
 getDonorInfo <- function(replicates) {
   donor_info <- replicates %>% 
-    select(biological_replicate_number, library.biosample.sex, library.biosample.age, library.biosample.life_stage)
+    dplyr::select(biological_replicate_number, library.biosample.sex, library.biosample.age, library.biosample.life_stage)
   names(donor_info) <- c("bio_rep", "sex", "age", "life_stage")
   
   return(donor_info)
@@ -452,12 +488,12 @@ getDocumentFiles <- function(replicates,
       if(length(aliases) > 1){
         aliases <- aliases[which(!grepl(":BG[a-zA-Z]LV", aliases))]
       }
-      aliases <- str_split(aliases, ":|,", simplify = T)[, 2]
+      aliases <- stringr::str_split(aliases, ":|,", simplify = T)[, 2]
       
-      tibble(bio_rep = bio_rep, 
-             biosample = accession, 
-             document = documents, 
-             biosample_alias = aliases)
+      tibble::tibble(bio_rep = bio_rep, 
+                     biosample = accession, 
+                     document = documents, 
+                     biosample_alias = aliases)
     }
   }else{
     documents_info <- tibble(bio_rep = c(1, 2))
@@ -484,10 +520,10 @@ getGeneQuantificationFiles <- function(files,
                                        valid_output_type = "gene quantifications",
                                        valid_genome_annotation = "V29") {
   tsv_files_info <- files %>% 
-    filter(file_format == valid_file_format) %>%
-    filter(output_type == valid_output_type) %>%
-    filter(genome_annotation == valid_genome_annotation) %>%
-    select(accession, biological_replicates, file_format, output_type, genome_annotation, technical_replicates) %>%
+    dplyr::filter(file_format == valid_file_format) %>%
+    dplyr::filter(output_type == valid_output_type) %>%
+    dplyr::filter(genome_annotation == valid_genome_annotation) %>%
+    dplyr::select(accession, biological_replicates, file_format, output_type, genome_annotation, technical_replicates) %>%
     tidyr::unnest(c(biological_replicates, technical_replicates)) %>%
     dplyr::rename("bio_rep" = "biological_replicates",
                   "tech_rep" = "technical_replicates",
@@ -540,17 +576,18 @@ LoopExperiments <- function(summary_tg_df,
                                          valid_output_type,
                                          valid_genome_annotation)
     control_df <- extractMetadataExperiment(response_control, 
-                                         "control", 
-                                         valid_nucleic_acid_type, 
-                                         valid_file_format,
-                                         valid_output_type,
-                                         valid_genome_annotation)
+                                            "control", 
+                                            valid_nucleic_acid_type, 
+                                            valid_file_format,
+                                            valid_output_type,
+                                            valid_genome_annotation)
     
     ## Combine cases and controls
     exp_df <- dplyr::bind_rows(case_df, control_df)
     
     ## Add the relevant information
-    exp_df <- exp_df %>% mutate(cell_line = exp_cell_line, gene_silencing_series = gss_id, .before = sample_id)
+    exp_df <- exp_df %>% 
+      dplyr::mutate(cell_line = exp_cell_line, gene_silencing_series = gss_id, .before = sample_id)
   }
   
   return(tg_df)
@@ -588,7 +625,8 @@ extractMetadataExperiment <- function(experiment,
   
   ## Main metadata
   experiment_sample_files <- getSampleFiles(experiment$files, valid_file_format, valid_output_type, valid_genome_annotation)
-  if(experiment_additional_info$nucleic_acid_type != valid_nucleic_acid_type) return(cbind(experiment_sample_files, experiment_additional_info))
+  if(experiment_additional_info$nucleic_acid_type != valid_nucleic_acid_type) 
+    return(cbind(experiment_sample_files, experiment_additional_info))
   
   ## Other metadata
   experiment_rin <- getRin(experiment$replicates)
@@ -600,13 +638,15 @@ extractMetadataExperiment <- function(experiment,
   
   ## Combine all information
   experiment_combined <- experiment_sample_files %>% 
-    left_join(experiment_rin, by = "bio_rep") %>%
-    left_join(experiment_read_depth, by = "bio_rep") %>%
-    left_join(experiment_donor_info, by = "bio_rep") %>% 
-    left_join(experiment_gene_quantifications %>% select(gene_quantification_id, bio_rep), by = "bio_rep") %>%
-    left_join(experiment_documents, by = "bio_rep") %>%
-    mutate(experiment_type = experiment_type, experiment_id = experiment_id, experiment_doi = experiment_doi, .before = "bio_rep") %>%
-    cbind(experiment_additional_info)
+    dplyr::left_join(experiment_rin, by = "bio_rep") %>%
+    dplyr::left_join(experiment_read_depth, by = "bio_rep") %>%
+    dplyr::left_join(experiment_donor_info, by = "bio_rep") %>% 
+    dplyr::left_join(experiment_gene_quantifications %>% 
+                       dplyr::select(gene_quantification_id, bio_rep), 
+                     by = "bio_rep") %>%
+    dplyr::left_join(experiment_documents, by = "bio_rep") %>%
+    dplyr::mutate(experiment_type = experiment_type, experiment_id = experiment_id, experiment_doi = experiment_doi, .before = "bio_rep") %>%
+    dplyr::cbind(experiment_additional_info)
   
 }
 
@@ -637,16 +677,20 @@ addTargetGeneCategory <- function(metadata_df,
   target_RBPs_metadata <- readr::read_delim(input_Category, show_col_types = F)
   
   metadata_df <- metadata_df %>% 
-    left_join(target_RBPs_metadata %>% 
-                select(name, `Splicing regulation`, Spliceosome, `Exon Junction Complex`) %>%
-                rename("Splicing_regulation" = "Splicing regulation",
-                       "Exon_junction_complex" = "Exon Junction Complex"),
-              by = c("target_gene" = "name"))
+    dplyr::left_join(target_RBPs_metadata %>% 
+                       dplyr::select(name, `Splicing regulation`, Spliceosome, `Exon Junction Complex`) %>%
+                       dplyr::rename("Splicing_regulation" = "Splicing regulation",
+                                     "Exon_junction_complex" = "Exon Junction Complex"),
+                     by = c("target_gene" = "name"))
   
   if(input_NMD != ""){
-    NMD_list <- readr::read_delim(input_NMD, show_col_types = F, delim = "\n") %>% dplyr::rename("Name" = "Name\t") %>% mutate(across(Name, str_replace, "\t", "")) %>% pull(Name)
+    NMD_list <- readr::read_delim(input_NMD, show_col_types = F, delim = "\n") %>% 
+      dplyr::rename("Name" = "Name\t") %>% 
+      dplyr::mutate(across(Name, str_replace, "\t", "")) %>% 
+      dplyr::pull(Name)
+    
     metadata_df <- metadata_df %>%
-      mutate(NMD = ifelse(target_gene %in% NMD_list, 1, 0))
+      dplyr::mutate(NMD = ifelse(target_gene %in% NMD_list, 1, 0))
   }
   
   if(output_file != ""){
@@ -676,3 +720,6 @@ addTargetGeneCategory <- function(metadata_df,
 #   }
 #   return(metadata_combined)
 # }
+# 
+
+
