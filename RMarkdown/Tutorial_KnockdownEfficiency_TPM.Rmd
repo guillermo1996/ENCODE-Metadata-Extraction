@@ -6,6 +6,10 @@ author:
   affiliation: UCL
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
+  md_document:
+    variant: markdown_github
+    toc: true
+    number_sections: true
   bookdown::html_document2:
     figure_caption: yes
     code_folding: show
@@ -16,23 +20,8 @@ output:
     toc depth: 4
     toc_float: true
     number_sections: true
-  md_document:
-    variant: markdown_github
-    toc: true
-    number_sections: true
 always_allow_html: true
 ---
-<style type="text/css">
-.dataTables_scrollHeadInner{
-  width:100% !important;
-}
-.dataTables_scrollHeadInner table{
-  width:100% !important;
-}
-.code-folding-btn {
-  display: none;
-}
-</style>
 
 ```{r setup, include = FALSE}
 shhh <- suppressPackageStartupMessages
@@ -51,23 +40,65 @@ source(here::here("Helper_Functions/hf_KnockdownEfficiency_TPM.R"))
 
 knitr::opts_chunk$set(echo = F, warning = F, message = F, out.width="85%", fig.align = "center", dpi = 300)
 
-prettier_DT <- function(x, order = NULL, dir = "desc"){
-  if(is.null(order)){
-    DT::datatable(x, options = list(scrollX = TRUE, autoWidth = FALSE, pageLength = 10, 
-                                    initComplete = DT::JS("function(){$(this).addClass('compact');}")), 
-                  class = "display cell-border compact nowrap")
+print_df <- function(x, 
+                     style = "html", 
+                     limit = NULL, random = F, seed = NULL,
+                     order = list(), autoWidth = FALSE, pageLength = 10, rownames = FALSE, compact = T,
+                     full_width = F){
+  if(style == "html"){
+    dt_class = "display cell-border nowrap"
+    if(compact) dt_class = paste0(dt_class, " compact")
+    DT::datatable(x,
+                  options = list(scrollX = TRUE,
+                                 autoWidth = autoWidth,
+                                 pageLength = pageLength,
+                                 order = order),
+                  class = dt_class,
+                  rownames = rownames)
   }else{
-    DT::datatable(x, options = list(scrollX = TRUE, autoWidth = FALSE, pageLength = 10, order = list(order, dir),
-                                    initComplete = DT::JS("function(){$(this).addClass('compact');}")), 
-                  class = "display cell-border compact nowrap")
+    if(length(order) != 0){
+      if(order[[2]] == "desc"){
+        x <- x %>%
+          dplyr::arrange(desc(.[[order[[1]]+1]]))
+      }else{
+        x <- x %>%
+          dplyr::arrange(.[[order[[1]]+1]])
+      }
+    }
+    
+    if(!is.null(limit)){
+      if(random){
+        if(!is.null(seed)){
+          set.seed(seed)
+        }
+        
+        x <- x %>% .[sample(1:nrow(.), limit), ]
+      }else{
+        x <- x %>% .[1:limit, ]
+      }
+    }
+    
+    x %>%
+      kableExtra::kbl(booktabs = T, linesep = "") %>%
+      kableExtra::kable_classic(full_width = full_width, "hover", "striped", html_font = "Cambria", font_size = 14) %>%
+      kableExtra::row_spec(0, bold = T, font_size = 16)
   }
 }
 
-prettier_kabble_extra <- function(x){
-  x[1:10, ] %>%
-    kableExtra::kbl() %>%
-    kableExtra::kable_classic(full_width = F, html_font = "Cambria")
+loadKnitOutput <- function(){
+  knit_output <- knitr::opts_knit$get("rmarkdown.pandoc.to")
+  if(is.null(knit_output)) return("html")
+  
+  if(grepl("html", knit_output)){
+    return("html")
+  }else if(grepl("markdown", knit_output)){
+    return("md")
+  }
+  
+  return("html")
 }
+
+knit_output = loadKnitOutput()
 
 category_labels <- c("Splicing_regulation" = "Splicing regulation", 
                      "Spliceosome"="Spliceosome", 
@@ -78,15 +109,17 @@ category_labels <- c("Splicing_regulation" = "Splicing regulation",
 ```{r theme-setup, echo = FALSE, eval = T}
 ## Custom sciRmdTheme with increased width.
 ## Please ask guillermorocamora@gmail.com for more details.
-sciRmdTheme::set.theme(
-  theme = "default",
-  color = NULL,
-  header.sticky = FALSE,
-  list.group.icon = "arrow",
-  font.family = "Arial",
-  font.color = "black",
-  header.color = "darkblue"
-)
+if(knit_output == "html"){
+  sciRmdTheme::set.theme(
+    theme = "default",
+    color = NULL,
+    header.sticky = FALSE,
+    list.group.icon = "arrow",
+    font.family = "Arial",
+    font.color = "black",
+    header.color = "darkblue"
+  )
+}
 
 custom_gg_theme <- theme(plot.title = element_text(size = 12, face = "bold"),
                   panel.border = ggplot2::element_rect(colour = "black", fill = NA, linewidth = 1),
@@ -107,6 +140,23 @@ custom_gg_theme <- theme(plot.title = element_text(size = 12, face = "bold"),
                   strip.background = element_rect(color="black", linewidth=1, linetype="solid"),
                   strip.text.y = element_text(color = "black", face = "bold", size = 9),
                   plot.margin = margin(0.5, 0.5, 0.2, 0.5, "cm"))
+```
+
+```{r load-theme_2, echo = F, results = "asis"}
+if(knit_output == "html"){
+cat('
+<style type="text/css">
+.dataTables_scrollHeadInner{
+  width:100% !important;
+}
+.dataTables_scrollHeadInner table{
+  width:100% !important;
+}
+.code-folding-btn {
+  display: none;
+}
+</style>')
+}
 ```
  
 # Objective
@@ -212,9 +262,7 @@ Results are shown in the following table:
 metadata_TPM %>% 
   dplyr::select(-path, -experiment_id, -file_path) %>%
   `colnames<-`(c("Target gene", "ENSEMBL ID", "Cell line", "Experiment type", "Gene quantification ID", "TPM")) %>%
-  .[sample(1:nrow(.), 10), ] %>%
-  kableExtra::kbl(booktabs = T, linesep = "") %>%
-  kableExtra::kable_classic(full_width = T, "hover", "striped", html_font = "Cambria", font_size = 14)
+  print_df(style = "md", limit = 10, random = T)
 ```
 
 ## Step 3: Estimating the Knockdown Efficiency
@@ -234,9 +282,7 @@ metadata_kEff %>%
   dplyr::select(-Avg_TPM_case, -Avg_TPM_control) %>%
   `colnames<-`(c("Target gene", "kEff [%]", "kEff HepG2 [%]", "kEff K562 [%]")) %>%
   dplyr::mutate(across(where(is.numeric), round, 1)) %>%
-  .[sample(1:nrow(.), 10), ] %>%
-  kableExtra::kbl(booktabs = T, linesep = "") %>%
-  kableExtra::kable_classic(full_width = F, "hover", "striped", html_font = "Cambria", font_size = 14)
+  print_df(style = "md", limit = 10, random = T)
 ```
 
 # Results
@@ -291,8 +337,7 @@ metadata_TPM %>%
   dplyr::select(target_gene, cell_line, experiment_type, TPM, gene_quantification_id) %>%
   dplyr::arrange(experiment_type, cell_line) %>%
   `colnames<-`(c("Target gene", "Cell line", "Cluster", "TPM", "Gene quantification ID")) %>%
-  kableExtra::kbl(booktabs = T, linesep = "") %>%
-  kableExtra::kable_classic(full_width = F, "hover", "striped", html_font = "Cambria", font_size = 14) %>%
+  print_df(style = "md") %>%
   kableExtra::row_spec(5:6, color = "black", background = "#ffaca1") %>%
   kableExtra::row_spec(7:8, color = "black", background = "#c2ffa1")
 ```
@@ -309,8 +354,7 @@ metadata_TPM %>%
    dplyr::mutate(Diff = (1-case/control)*100) %>%
    dplyr::mutate(Diff = paste0(round(Diff, 1), "%")) %>%
    `colnames<-`(c("Target gene", "Cell line", "TPM Cases", "TPM Controls", "kEff")) %>%
-   kableExtra::kbl(booktabs = T, linesep = "") %>%
-   kableExtra::kable_classic(full_width = F, "hover", "striped", html_font = "Cambria", font_size = 14)
+   print_df(style = "md")
 ```
 
 In some cases, the difference in $kEff$ between the two cell lines is significantly greater. In the following table and graph, we show the $kEff$ for each cell line and the difference between the two:
@@ -329,12 +373,7 @@ kEff_cell_line %>%
   dplyr::mutate(Diff = abs(HepG2 - K562)) %>%
   `colnames<-`(c("Target gene", "HepG2 kEff %", "K562 kEff %", "Difference abs(HepG2 - K562)")) %>%
   dplyr::mutate(across(where(is.numeric), round, 1)) %>%
-  DT::datatable(rownames = F,
-                options = list(scrollX = TRUE,
-                               autoWidth = FALSE,
-                               pageLength = 10,
-                               order = list(3, "desc")),
-                class = "display cell-border compact nowrap")
+  print_df(style = knit_output, order = list(3, "desc"), limit = 20)
 ```
 
 ```{r app1-kEff-cell_line-graph, echo = F, fig.height=12, fig.width=7.2, dpi = 300}

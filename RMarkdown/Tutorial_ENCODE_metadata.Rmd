@@ -21,17 +21,6 @@ output:
     number_sections: true
 always_allow_html: true
 ---
-<style type="text/css">
-.dataTables_scrollHeadInner{
-  width:100% !important;
-}
-.dataTables_scrollHeadInner table{
-  width:100% !important;
-}
-.code-folding-btn {
-  display: none;
-}
-</style>
 
 ```{r setup, include = FALSE}
 library(tidyverse)
@@ -55,6 +44,16 @@ print_df <- function(x,
                   class = dt_class,
                   rownames = rownames)
   }else{
+    if(length(order) != 0){
+      if(order[[2]] == "desc"){
+        x <- x %>%
+          dplyr::arrange(desc(.[[order[[1]]+1]]))
+      }else{
+        x <- x %>%
+          dplyr::arrange(.[[order[[1]]+1]])
+      }
+    }
+    
     if(!is.null(limit)){
       if(random){
         if(!is.null(seed)){
@@ -90,7 +89,7 @@ loadKnitOutput <- function(){
 knit_output = loadKnitOutput()
 ```
 
-```{r load-theme, echo = F}
+```{r load-theme, echo = F, results = "asis"}
 ## Custom sciRmdTheme with increased width.
 ## Please ask guillermorocamora@gmail.com for more details.
 if(knit_output == "html"){
@@ -106,8 +105,25 @@ if(knit_output == "html"){
 }
 ```
 
+```{r load-theme_2, echo = F, results = "asis"}
+if(knit_output == "html"){
+cat('
+<style type="text/css">
+.dataTables_scrollHeadInner{
+  width:100% !important;
+}
+.dataTables_scrollHeadInner table{
+  width:100% !important;
+}
+.code-folding-btn {
+  display: none;
+}
+</style>')
+}
+```
+
+
 # Introduction
-Print `r knitr::opts_knit$get("rmarkdown.pandoc.to")`
 
 In this tutorial, we will use [the ENCODE REST API](https://www.encodeproject.org/help/rest-api/) to automate the metadata extraction of experiments related to shRNA knockdown against specific target genes. The functions provided can also be used to extend its functionality (see [appendix 1](#appendix1)).
 

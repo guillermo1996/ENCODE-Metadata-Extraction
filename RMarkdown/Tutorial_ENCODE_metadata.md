@@ -22,21 +22,7 @@
     download</a>
 -   <a href="#session-info" id="toc-session-info">6 Session info</a>
 
-<style type="text/css">
-.dataTables_scrollHeadInner{
-  width:100% !important;
-}
-.dataTables_scrollHeadInner table{
-  width:100% !important;
-}
-.code-folding-btn {
-  display: none;
-}
-</style>
-
 # 1 Introduction
-
-Print markdown_github-yaml_metadata_block
 
 In this tutorial, we will use [the ENCODE REST
 API](https://www.encodeproject.org/help/rest-api/) to automate the

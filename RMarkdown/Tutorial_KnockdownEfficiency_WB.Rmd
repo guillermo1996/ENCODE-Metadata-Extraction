@@ -22,18 +22,6 @@ output:
     number_sections: true
 always_allow_html: true
 ---
-<style type="text/css">
-.dataTables_scrollHeadInner{
-  width:100% !important;
-}
-.dataTables_scrollHeadInner table{
-  width:100% !important;
-}
-.code-folding-btn {
-  display: none;
-}
-</style>
-
 ```{r setup, include = FALSE}
 shhh <- suppressPackageStartupMessages
 shhh(library(kableExtra))
@@ -51,27 +39,65 @@ source(here::here("Helper_Functions/hf_KnockdownEfficiency_WB.R"))
 
 knitr::opts_chunk$set(echo = F, warning = F, message = F, out.width="85%", fig.align = "center", dpi = 300)
 
-prettier_kabble_extra <- function(x){
-  x[1:10, ] %>%
-    kableExtra::kbl() %>%
-    kableExtra::kable_classic(full_width = F, html_font = "Cambria")
-}
-
-prettier_DT <- function(x, order = NULL, dir = "desc"){
-  if(is.null(order)){
-    DT::datatable(x, options = list(scrollX = TRUE, 
-                                    autoWidth = FALSE, 
-                                    pageLength = 10), 
-                  class = "display cell-border compact nowrap")
+print_df <- function(x, 
+                     style = "html", 
+                     limit = NULL, random = F, seed = NULL,
+                     order = list(), autoWidth = FALSE, pageLength = 10, rownames = FALSE, compact = T,
+                     full_width = F){
+  if(style == "html"){
+    dt_class = "display cell-border nowrap"
+    if(compact) dt_class = paste0(dt_class, " compact")
+    DT::datatable(x,
+                  options = list(scrollX = TRUE,
+                                 autoWidth = autoWidth,
+                                 pageLength = pageLength,
+                                 order = order),
+                  class = dt_class,
+                  rownames = rownames)
   }else{
-    DT::datatable(x, options = list(scrollX = TRUE, 
-                                    autoWidth = FALSE, 
-                                    pageLength = 10, 
-                                    order = list(order, dir)), 
-                  class = "display cell-border compact nowrap")
+    if(length(order) != 0){
+      if(order[[2]] == "desc"){
+        x <- x %>%
+          dplyr::arrange(desc(.[[order[[1]]+1]]))
+      }else{
+        x <- x %>%
+          dplyr::arrange(.[[order[[1]]+1]])
+      }
+    }
+    
+    if(!is.null(limit)){
+      if(random){
+        if(!is.null(seed)){
+          set.seed(seed)
+        }
+        
+        x <- x %>% .[sample(1:nrow(.), limit), ]
+      }else{
+        x <- x %>% .[1:limit, ]
+      }
+    }
+    
+    x %>%
+      kableExtra::kbl(booktabs = T, linesep = "") %>%
+      kableExtra::kable_classic(full_width = full_width, "hover", "striped", html_font = "Cambria", font_size = 14) %>%
+      kableExtra::row_spec(0, bold = T, font_size = 16)
   }
 }
 
+loadKnitOutput <- function(){
+  knit_output <- knitr::opts_knit$get("rmarkdown.pandoc.to")
+  if(is.null(knit_output)) return("html")
+  
+  if(grepl("html", knit_output)){
+    return("html")
+  }else if(grepl("markdown", knit_output)){
+    return("md")
+  }
+  
+  return("html")
+}
+
+knit_output = loadKnitOutput()
 category_labels <- c("Splicing_regulation" = "Splicing regulation", 
                      "Spliceosome"="Spliceosome", 
                      "Exon_junction_complex" = "Exon junction complex",
@@ -81,15 +107,17 @@ category_labels <- c("Splicing_regulation" = "Splicing regulation",
 ```{r theme-setup, echo = FALSE, eval = T}
 ## Custom sciRmdTheme with increased width.
 ## Please ask guillermorocamora@gmail.com for more details.
-sciRmdTheme::set.theme(
-  theme = "default",
-  color = NULL,
-  header.sticky = FALSE,
-  list.group.icon = "arrow",
-  font.family = "Arial",
-  font.color = "black",
-  header.color = "darkblue"
-)
+if(knit_output == "html"){
+  sciRmdTheme::set.theme(
+    theme = "default",
+    color = NULL,
+    header.sticky = FALSE,
+    list.group.icon = "arrow",
+    font.family = "Arial",
+    font.color = "black",
+    header.color = "darkblue"
+  )
+}
 
 custom_gg_theme <- theme(
   plot.title = element_text(size = 12, face = "bold"),
@@ -112,6 +140,23 @@ custom_gg_theme <- theme(
   strip.text.y = element_text(color = "black", face = "bold", size = 9),
   plot.margin = margin(0.5, 0.5, 0.2, 0.5, "cm")
 )
+```
+
+```{r load-theme_2, echo = F, results = "asis"}
+if(knit_output == "html"){
+cat('
+<style type="text/css">
+.dataTables_scrollHeadInner{
+  width:100% !important;
+}
+.dataTables_scrollHeadInner table{
+  width:100% !important;
+}
+.code-folding-btn {
+  display: none;
+}
+</style>')
+}
 ```
 
 # Objective
@@ -370,7 +415,7 @@ metadata_WB_kEff <- metadata_WB_kEff %>%
 metadata_WB_kEff %>%
   dplyr::select(-kEff_HepG2, -kEff_K562) %>%
   `colnames<-`(c("Target gene", "Category", "kEff [%]")) %>%
-  prettier_DT(order = 3)
+  print_df(style = knit_output, order = list(3, "desc"), limit = 20)
 ```
 
 From the `r metadata_RBPs %>% pull(target_gene) %>% unique %>% length` studied projects, `r metadata_RBPs %>% left_join(metadata_WB_kEff %>% select(target_gene, kEff_avg), by = "target_gene") %>% filter(is.na(kEff_avg)) %>% pull(target_gene) %>% unique %>% length` of them had no available information for any of the two cell lines. The average knockdown efficiency is `r metadata_WB_kEff$kEff_avg %>% mean(na.rm = T) %>% round(1)`%, ranging from `r metadata_WB_kEff$kEff_avg %>% min(na.rm = T) %>% round(1)` to `r metadata_WB_kEff$kEff_avg %>% max(na.rm = T) %>% round(1)`% in some cases. In the following visualization, we represent in the X-axis the knockdown efficiency for every studied target RBP/NMD, split by their functional category:
@@ -410,7 +455,7 @@ metadata_WB_kEff %>%
   dplyr::select(-kEff_avg) %>%
   `colnames<-`(c("Target gene", "Category", "HepG2 kEff [%]", "K562 kEff [%]", "Difference abs(HepG2 - K562)")) %>%
   dplyr::mutate(across(where(is.numeric), round, 1)) %>%
-  prettier_DT(order = 5)
+  print_df(style = knit_output, order = list(5, "desc"), limit = 10)
 ```
 
 ```{r kEff-cell_line-graph, echo = F, fig.height=12, fig.width=7.2, dpi = 300}
