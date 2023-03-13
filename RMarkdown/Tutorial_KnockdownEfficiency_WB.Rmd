@@ -6,10 +6,6 @@ author:
   affiliation: UCL
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
-  md_document:
-    variant: markdown_github
-    toc: true
-    number_sections: true
   bookdown::html_document2:
     figure_caption: yes
     code_folding: show
@@ -19,6 +15,10 @@ output:
     toc: true
     toc depth: 4
     toc_float: true
+    number_sections: true
+  md_document:
+    variant: markdown_github
+    toc: true
     number_sections: true
 always_allow_html: true
 ---
