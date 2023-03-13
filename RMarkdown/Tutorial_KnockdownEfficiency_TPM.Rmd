@@ -1,33 +1,36 @@
 ---
-title: "TPM Knockdown efficiency estimation"
+title: "Knockdown Efficiency estimation"
+subtitle: "TPM from ENCODE"
 author: 
 - name: "Guillermo Rocamora Pérez"
-  affiliation: UCL - Version 2.0
+  affiliation: UCL
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
+  bookdown::html_document2:
+    figure_caption: yes
+    code_folding: show
+    theme: paper
+    highlight: haddock
+    df_print: paged
+    toc: true
+    toc depth: 4
+    toc_float: true
+    number_sections: true
   md_document:
     variant: markdown_github
     toc: true
     number_sections: true
 always_allow_html: true
-# output:
-#   bookdown::html_document2:
-#     figure_caption: yes
-#     code_folding: show
-#     theme: paper
-#     highlight: haddock
-#     df_print: paged
-#     toc: true
-#     toc depth: 4
-#     toc_float: true
-#     number_sections: true
 ---
 <style type="text/css">
-body{
-  font-size: 12pt;
+.dataTables_scrollHeadInner{
+  width:100% !important;
 }
-h1{
-  font-size: 24pt;
+.dataTables_scrollHeadInner table{
+  width:100% !important;
+}
+.code-folding-btn {
+  display: none;
 }
 </style>
 
@@ -42,16 +45,21 @@ shhh(library(biomaRt))
 shhh(library(foreach))
 shhh(library(doSNOW))
 shhh(library(tidyverse))
+options(dplyr.summarise.inform = FALSE)
 
-source("helperFunctions.R")
+source(here::here("Helper_Functions/hf_KnockdownEfficiency_TPM.R"))
 
-knitr::opts_chunk$set(warning = F, message = F, echo = TRUE)
+knitr::opts_chunk$set(echo = F, warning = F, message = F, out.width="85%", fig.align = "center", dpi = 300)
 
 prettier_DT <- function(x, order = NULL, dir = "desc"){
   if(is.null(order)){
-    DT::datatable(x, options = list(scrollX = TRUE, autoWidth = FALSE, pageLength = 10), class = "display cell-border compact nowrap")
+    DT::datatable(x, options = list(scrollX = TRUE, autoWidth = FALSE, pageLength = 10, 
+                                    initComplete = DT::JS("function(){$(this).addClass('compact');}")), 
+                  class = "display cell-border compact nowrap")
   }else{
-    DT::datatable(x, options = list(scrollX = TRUE, autoWidth = FALSE, pageLength = 10, order = list(order, dir)), class = "display cell-border compact nowrap")
+    DT::datatable(x, options = list(scrollX = TRUE, autoWidth = FALSE, pageLength = 10, order = list(order, dir),
+                                    initComplete = DT::JS("function(){$(this).addClass('compact');}")), 
+                  class = "display cell-border compact nowrap")
   }
 }
 
@@ -61,52 +69,24 @@ prettier_kabble_extra <- function(x){
     kableExtra::kable_classic(full_width = F, html_font = "Cambria")
 }
 
-options(dplyr.summarise.inform = FALSE)
 category_labels <- c("Splicing_regulation" = "Splicing regulation", 
                      "Spliceosome"="Spliceosome", 
                      "Exon_junction_complex" = "Exon junction complex",
                      "NMD" = "Nononsense-mediated decay")
 ```
 
-<!-- ```{r setup-variables, include = F} -->
-<!-- metadata_path <- path.expand("~/RytenLab-Research/02-ENCODE_API/Metadata_results/metadata_combined.tsv") -->
-<!-- metadata <- readr::read_delim(metadata_path, show_col_types = F) %>% as_tibble() -->
-
-<!-- metadata_kEff_path <- path.expand("~/RytenLab-Research/02-ENCODE_API/Metadata_results/metadata_kEff.tsv") -->
-<!-- metadata_kEff <- readr::read_delim(metadata_kEff_path, show_col_types = F) %>% as_tibble() -->
-
-<!-- metadata_kEff_PCR_path <- path.expand("~/RytenLab-Research/02-ENCODE_API/Metadata_results/metadata_kEff_qt-PCR.tsv") -->
-<!-- metadata_kEff_PCR <- readr::read_delim(metadata_kEff_PCR_path, show_col_types = F) %>% as_tibble() -->
-
-<!-- target_RBPs = metadata %>%  -->
-<!--   filter(if_any(c(Splicing_regulation, Spliceosome, Exon_junction_complex, NMD), ~ . != 0)) %>% -->
-<!--   dplyr::pull(target_gene) %>% -->
-<!--   unique() -->
-
-<!-- metadata_RBPs <- metadata %>%  -->
-<!--   filter(target_gene %in% target_RBPs) %>% -->
-<!--   pivot_longer(c("Splicing_regulation", "Spliceosome", "Exon_junction_complex", "NMD"), names_to = "Category") %>% -->
-<!--   filter(value == 1) %>% -->
-<!--   select(-value) %>% -->
-<!--   distinct(target_gene, sample_id, .keep_all = T) -->
-
-<!-- metadata_kEff <- metadata_kEff %>% -->
-<!--   left_join(metadata_RBPs %>% select(target_gene, Category) %>% distinct(), -->
-<!--             by = "target_gene") %>% -->
-<!--   relocate(Category, .after = target_gene) %>% -->
-<!--   filter(!is.na(kEff_avg)) -->
-<!-- ``` -->
-
 ```{r theme-setup, echo = FALSE, eval = T}
-# simplest default settings
+## Custom sciRmdTheme with increased width.
+## Please ask guillermorocamora@gmail.com for more details.
 sciRmdTheme::set.theme(
   theme = "default",
-  color = "#2c3e50",
-  header.sticky = F,
+  color = NULL,
+  header.sticky = FALSE,
   list.group.icon = "arrow",
-  font.color = "#222222",
-  font.family = "Helvetica"
-  )
+  font.family = "Arial",
+  font.color = "black",
+  header.color = "darkblue"
+)
 
 custom_gg_theme <- theme(plot.title = element_text(size = 12, face = "bold"),
                   panel.border = ggplot2::element_rect(colour = "black", fill = NA, linewidth = 1),
@@ -129,9 +109,13 @@ custom_gg_theme <- theme(plot.title = element_text(size = 12, face = "bold"),
                   plot.margin = margin(0.5, 0.5, 0.2, 0.5, "cm"))
 ```
  
+# Objective
+
+In this tutorial, we aim to estimate the knockdown efficiency of the shRNA knockdown targeted genes by comparing the TPM values between control and cases. This method is not the recommended approach to measure the knockdown effiency, please refer to the Western Blotting method extracted from ENCODE.
+
 # Methods
 
-First, we needed a list of target RBPs to study. As with the previous studies, we will employ the list of 356 RBPs published by Nostrand et al. which has been categorized as splicing regulation, spliceosome or exon-junction complex. We also added a list of 118 genes classified as involved in nononsense-mediated decay processes. In total, 56 of those genes were found as ENCODE projects with the same number of experiments and similar metadata.
+First, we needed a list of target RBPs to study. As with the previous studies, we will employ the list of 356 RBPs published by *Van Nostrand et. al.* [A large-scale binding and functional map of human RNA-binding proteins](https://www.nature.com/articles/s41586-020-2077-3) categorized as splicing regulation, spliceosome or exon-junction complex. We also added a list of 118 genes classified as involved in nononsense-mediated decay processes. In total, 56 of those genes were found as ENCODE projects with the same number of experiments and similar metadata.
 
 Once we have set the list of ENCODE projects to focus our studies, we need to download the gene expressions for all samples. We have to consider:
 
@@ -144,57 +128,56 @@ Then, we need to extract the TPM value of the target gene in that particular exp
 
 - Since the `gene_quantification.tsv` files use the gene ENSEMBL notation, we use the `biomaRt` package to translate from the HGNC nomenclature to their ENSEMBL Id.
 - The provided tables in `gene_quantification` contain many useful columns: TPM, posterior mean estimates of the TPM (using Gibbs sampling), lower and upper CI bounds and TPM coefficient of quartile variation. We opted to use the TPM column as is. 
-<!-- - We need to remove the [versioning number](http://www.ensembl.org/Help/Faq?id=488) from the ENSEMBL id of each gene.  -->
     
-Once we have the TPM values before and after the knockdown, we evaluate the knockdown efficiency as defined in equation (3). For that, we first need to calculate the average TPM values for each cluster (case/control), independent of the cell line. A knockdown efficiency of 100% implies that the target gene was not found in the case sample, while a 0% indicates that no change in TPM was observed.
+Once we have the TPM values before and after the knockdown, we evaluate the knockdown efficiency as defined in equation (1). For that, we first need to calculate the average TPM values for each cluster (case/control), independent of the cell line. A knockdown efficiency of 100% implies that the target gene was not found in the case sample, while a 0% indicates that no change in TPM was observed.
 
 $$
-kEff\;\% =\left(1-\frac{TPM_{avg,\;case}}{TPM_{avg,\;control}}\right)*100\%\tag{3}
+kEff\;\% =\left(1-\frac{TPM_{avg,\;case}}{TPM_{avg,\;control}}\right)*100\%\tag{1}
 $$
 
 # Steps
 
-## Step 1: Load previous metadata and set script parameters
+## Step 0: Load previous metadata and set script parameters {-}
 
 First, we need to indicate the file from which to obtain the metadata of the samples. In our case, it is the path to the file generated from the metadata extraction tutorial. We also need to specify certain parameters to the algorithm, like the directory to save the `gene_quantification.tsv` files, or the number of cores to use.
 
-```{r}
-# Files
-metadata_path <- "../Metadata_results/metadata_samples.tsv"
-metadata_output <-"../Metadata_results/metadata_TPM_kEff.tsv"
+```{r, echo = T}
+## Input Files
+main_metadata_path <- here::here("Metadata_Results/")
+metadata_path <- paste0(main_metadata_path, "metadata_samples.tsv")
+metadata_TPM_output <- paste0(main_metadata_path, "metadata_TPM_kEff.tsv")
 
-# Define the algorithm variables
-main_path = "RBPs/"
+## Define the algorithm variables
+main_path = here::here("Knockdown_Efficiency/TPM/RBPs/")
+download_only = F
 download_cores = 16
 overwrite_results = F
 
-# Generate the variables
+## Generate the variables ----
 metadata <- readr::read_delim(metadata_path, show_col_types = F) %>% as_tibble()
 
 target_RBPs <- metadata %>%
-  filter(if_any(c(Splicing_regulation, Spliceosome, Exon_junction_complex, NMD), ~ . != 0)) %>%
-  filter(!is.na(gene_quantification_id)) %>%
-  pull(target_gene) %>%
+  dplyr::filter(if_any(c(Splicing_regulation, Spliceosome, Exon_junction_complex, NMD), ~ . != 0)) %>%
+  dplyr::filter(!is.na(gene_quantification_id)) %>%
+  dplyr::pull(target_gene) %>%
   unique()
 
-# Convert HGCN nomenclature to ENSEMBL ID
+## Convert HGCN nomenclature to ENSEMBL ID
 ensembl_target_RBPs <- translateGenes(target_RBPs)
 
 metadata_filtered <- metadata %>%
-  filter(target_gene %in% target_RBPs, !is.na(gene_quantification_id)) %>%
+  dplyr::filter(target_gene %in% target_RBPs, !is.na(gene_quantification_id)) %>%
   dplyr::select(target_gene, cell_line, experiment_type, experiment_id, gene_quantification_id) %>%
-  mutate(path = paste0(main_path, target_gene, "/", experiment_type, "/")) %>%
-  left_join(ensembl_target_RBPs, by = c("target_gene" = "hgnc_symbol")) %>%
-  relocate(ensembl_gene_id, .before = cell_line)
-
-
+  dplyr::mutate(path = paste0(main_path, target_gene, "/", experiment_type, "/")) %>%
+  dplyr::left_join(ensembl_target_RBPs, by = c("target_gene" = "hgnc_symbol"), multiple = "all") %>%
+  dplyr::relocate(ensembl_gene_id, .before = cell_line)
 ```
 
-## Step 2: Download the `gene_quantification` files
+## Step 1: Download the `gene_quantification` files {-}
 
 Next, we use the functions `createDirectories()` and `downloadGeneQuantifications()` to generate the folder structure where the gene quantifications will be stored and to download them from the ENCODE portal. The download process can be parallelized, since most of the download times is spent stablishing the connection to the server and not downloading the file itself (meaning that it is unlikely to saturate the download bandwidth).
 
-```{r message=F}
+```{r, echo = T, message=F}
 # Create the directories
 createDirectories(target_RBPs, metadata_filtered)
 
@@ -205,42 +188,55 @@ metadata_quantifications <- downloadGeneQuantifications(metadata_filtered,
                                                         silent = T)
 ```
 
-## Step 3: TPM extraction
+## Step 2: TPM extraction {-}
 
 Using the package `biomaRt`, we converted the HGCN nomenclature of the genes into their ENSEMBL ID. Then, we use the function `extractTPM()` to read the gene quantification file and extract the TPM for the target gene of that particular samples.
 
-```{r}
+```{r, echo = F, eval = T}
+file_name <- here::here("metadata_TPM.rds")
+if(file.exists(file_name)){
+  metadata_TPM <- readRDS(file_name)
+}else{
+  metadata_TPM <- extractTPM(metadata_quantifications)
+}
+```
+
+```{r, echo = T, eval = F}
 # Extract the TPMs
 metadata_TPM <- extractTPM(metadata_quantifications)
 ```
 
 Results are shown in the following table:
 
-```{r echo = F}
+```{r, echo = F}
 metadata_TPM %>% 
   dplyr::select(-path, -experiment_id, -file_path) %>%
   `colnames<-`(c("Target gene", "ENSEMBL ID", "Cell line", "Experiment type", "Gene quantification ID", "TPM")) %>%
-  prettier_kabble_extra()
+  .[sample(1:nrow(.), 10), ] %>%
+  kableExtra::kbl(booktabs = T, linesep = "") %>%
+  kableExtra::kable_classic(full_width = T, "hover", "striped", html_font = "Cambria", font_size = 14)
 ```
 
-## Step 4: Estimating the Knockdown Efficiency
+## Step 3: Estimating the Knockdown Efficiency
 
-Lastly, we use the function `generateKnockdownEfficiency()` to apply the knockdown efficiency formula. Results are obtained for both all samples at the same time and divided by cell lines. In most cases, the overall knockdown efficiency is the around the average of the efficiencies for each cell line (with some notable exceptions).
+Lastly, we use the function `generateKnockdownEfficiency()` to apply the knockdown efficiency formula. Results are obtained for both all samples at the same time and divided by cell lines. In most cases, the overall knockdown efficiency is the average of the efficiencies for each cell line (with some notable exceptions).
 
-```{r}
+```{r, echo = T}
 # Generate and save the knockdown efficiencies
 metadata_kEff <- generateKnockdownEfficiency(metadata_TPM,
-                                             output_file = metadata_output)
+                                             output_file = metadata_TPM_output)
 ```
 
 Final results are stored in disk:
 
-```{r echo = F}
+```{r, echo = F}
 metadata_kEff %>%
   dplyr::select(-Avg_TPM_case, -Avg_TPM_control) %>%
   `colnames<-`(c("Target gene", "kEff [%]", "kEff HepG2 [%]", "kEff K562 [%]")) %>%
   dplyr::mutate(across(where(is.numeric), round, 1)) %>%
-  prettier_kabble_extra()
+  .[sample(1:nrow(.), 10), ] %>%
+  kableExtra::kbl(booktabs = T, linesep = "") %>%
+  kableExtra::kable_classic(full_width = F, "hover", "striped", html_font = "Cambria", font_size = 14)
 ```
 
 # Results
@@ -251,18 +247,18 @@ The average knockdown efficiency is `r metadata_kEff$kEff %>% mean %>% round`%, 
 
 ```{r app1-kEff-category-graph, echo = F, fig.height=9, fig.width=7.2, dpi = 300}
 metadata_RBPs <- metadata %>% 
-  filter(target_gene %in% target_RBPs) %>%
-  pivot_longer(c("Splicing_regulation", "Spliceosome", "Exon_junction_complex", "NMD"), names_to = "Category") %>%
-  filter(value == 1) %>%
-  select(-value) %>%
-  distinct(target_gene, sample_id, .keep_all = T)
+  dplyr::filter(target_gene %in% target_RBPs) %>%
+  tidyr::pivot_longer(c("Splicing_regulation", "Spliceosome", "Exon_junction_complex", "NMD"), names_to = "Category") %>%
+  dplyr::filter(value == 1) %>%
+  dplyr::select(-value) %>%
+  dplyr::distinct(target_gene, sample_id, .keep_all = T)
 
 kEff_category <- metadata_kEff %>%
-  left_join(metadata_RBPs %>% select(target_gene, Category) %>% distinct(),
-            by = "target_gene") %>%
-  arrange(-kEff) %>%
-  mutate(target_gene = factor(target_gene, levels = .$target_gene),
-         Category = factor(Category, levels = c("Splicing_regulation", "Spliceosome", "NMD", "Exon_junction_complex")))
+  dplyr::left_join(metadata_RBPs %>% select(target_gene, Category) %>% dplyr::distinct(),
+                   by = "target_gene") %>%
+  dplyr::arrange(-kEff) %>%
+  dplyr::mutate(target_gene = factor(target_gene, levels = .$target_gene),
+                Category = factor(Category, levels = c("Splicing_regulation", "Spliceosome", "NMD", "Exon_junction_complex")))
 
 ggplot(kEff_category) +
   geom_bar(aes(x = target_gene, y = kEff, fill = Category), stat = "identity", color = "black", linewidth = 0.25, width = 0.8) +
@@ -291,30 +287,30 @@ Let's study the gene `MATR3` for example, where we observe that the $TPM_{avg,\,
 
 ```{r app1-tpm-MATR3, echo = F}
 metadata_TPM %>%
-  filter(target_gene == "MATR3") %>%
+  dplyr::filter(target_gene == "MATR3") %>%
   dplyr::select(target_gene, cell_line, experiment_type, TPM, gene_quantification_id) %>%
-  arrange(experiment_type, cell_line) %>%
+  dplyr::arrange(experiment_type, cell_line) %>%
   `colnames<-`(c("Target gene", "Cell line", "Cluster", "TPM", "Gene quantification ID")) %>%
-  kbl() %>%
-  kable_classic(full_width = F, html_font = "Cambria", font_size = 13) %>%
-  row_spec(5:6, color = "black", background = "#ffaca1") %>%
-  row_spec(7:8, color = "black", background = "#c2ffa1")
+  kableExtra::kbl(booktabs = T, linesep = "") %>%
+  kableExtra::kable_classic(full_width = F, "hover", "striped", html_font = "Cambria", font_size = 14) %>%
+  kableExtra::row_spec(5:6, color = "black", background = "#ffaca1") %>%
+  kableExtra::row_spec(7:8, color = "black", background = "#c2ffa1")
 ```
 
 If we study the knockdown efficiency for each cell line individually, we observe a $kEff$ of 66.8% for HepG2 and 79% for K562:
 
 ```{r app1-kEff-MATR3, echo = F}
 metadata_TPM %>%
-   filter(target_gene == "MATR3") %>% 
+   dplyr::filter(target_gene == "MATR3") %>% 
    dplyr::select(target_gene, cell_line, experiment_type, TPM, gene_quantification_id) %>%
-   group_by(target_gene, cell_line, experiment_type) %>%
-   summarize(avg_TPM = mean(TPM)) %>%
-   pivot_wider(c(target_gene, cell_line), names_from = "experiment_type", values_from = avg_TPM) %>%
-   mutate(Diff = (1-case/control)*100) %>%
-  mutate(Diff = paste0(round(Diff, 1), "%")) %>%
+   dplyr::group_by(target_gene, cell_line, experiment_type) %>%
+   dplyr::summarize(avg_TPM = mean(TPM)) %>%
+   tidyr::pivot_wider(c(target_gene, cell_line), names_from = "experiment_type", values_from = avg_TPM) %>%
+   dplyr::mutate(Diff = (1-case/control)*100) %>%
+   dplyr::mutate(Diff = paste0(round(Diff, 1), "%")) %>%
    `colnames<-`(c("Target gene", "Cell line", "TPM Cases", "TPM Controls", "kEff")) %>%
-   kbl() %>%
-   kable_classic(full_width = F, html_font = "Cambria", font_size = 13)
+   kableExtra::kbl(booktabs = T, linesep = "") %>%
+   kableExtra::kable_classic(full_width = F, "hover", "striped", html_font = "Cambria", font_size = 14)
 ```
 
 In some cases, the difference in $kEff$ between the two cell lines is significantly greater. In the following table and graph, we show the $kEff$ for each cell line and the difference between the two:
@@ -322,31 +318,36 @@ In some cases, the difference in $kEff$ between the two cell lines is significan
 ```{r app1-kEff-cell_line, echo = F}
 kEff_cell_line <- metadata_TPM %>%
   dplyr::select(target_gene, cell_line, experiment_type, TPM, gene_quantification_id) %>%
-  group_by(target_gene, cell_line, experiment_type) %>%
-  summarize(avg_TPM = mean(TPM)) %>%
-  pivot_wider(c(target_gene, cell_line), names_from = "experiment_type", values_from = avg_TPM) %>%
-  mutate(Diff = (1-case/control)*100)
+  dplyr::group_by(target_gene, cell_line, experiment_type) %>%
+  dplyr::summarize(avg_TPM = mean(TPM)) %>%
+  tidyr::pivot_wider(c(target_gene, cell_line), names_from = "experiment_type", values_from = avg_TPM) %>%
+  dplyr::mutate(Diff = (1-case/control)*100)
 
 kEff_cell_line %>%
-  group_by(target_gene) %>%
-  pivot_wider(target_gene, names_from = cell_line, values_from = Diff) %>%
-  mutate(Diff = abs(HepG2 - K562)) %>%
+  dplyr::group_by(target_gene) %>%
+  tidyr::pivot_wider(id_cols = target_gene, names_from = cell_line, values_from = Diff) %>%
+  dplyr::mutate(Diff = abs(HepG2 - K562)) %>%
   `colnames<-`(c("Target gene", "HepG2 kEff %", "K562 kEff %", "Difference abs(HepG2 - K562)")) %>%
-  mutate(across(where(is.numeric), round, 1)) %>%
-  prettier_kabble_extra()
+  dplyr::mutate(across(where(is.numeric), round, 1)) %>%
+  DT::datatable(rownames = F,
+                options = list(scrollX = TRUE,
+                               autoWidth = FALSE,
+                               pageLength = 10,
+                               order = list(3, "desc")),
+                class = "display cell-border compact nowrap")
 ```
 
 ```{r app1-kEff-cell_line-graph, echo = F, fig.height=12, fig.width=7.2, dpi = 300}
 test <- kEff_cell_line %>%
-  group_by(target_gene) %>%
-  pivot_wider(target_gene, names_from = cell_line, values_from = Diff) %>%
-  mutate(Diff = abs(HepG2 - K562)) %>%
-  left_join(metadata_RBPs %>% select(target_gene, Category) %>% distinct(),
-            by = "target_gene") %>%
-  arrange(-HepG2) %>%
-  mutate(target_gene = factor(target_gene, levels = .$target_gene),
-         Category = factor(Category, levels = c("Splicing_regulation", "Spliceosome", "NMD", "Exon_junction_complex")),
-         type = ifelse(HepG2 > K562, "HepG2", "K562"))
+  dplyr::group_by(target_gene) %>%
+  tidyr::pivot_wider(target_gene, names_from = cell_line, values_from = Diff) %>%
+  dplyr::mutate(Diff = abs(HepG2 - K562)) %>%
+  dplyr::left_join(metadata_RBPs %>% select(target_gene, Category) %>% distinct(),
+                   by = "target_gene") %>%
+  dplyr::arrange(-HepG2) %>%
+  dplyr::mutate(target_gene = factor(target_gene, levels = .$target_gene),
+                Category = factor(Category, levels = c("Splicing_regulation", "Spliceosome", "NMD", "Exon_junction_complex")),
+                type = ifelse(HepG2 > K562, "HepG2", "K562"))
 
 ggplot(test) +
   geom_segment(aes(x = target_gene, y = HepG2, yend = K562, xend = target_gene, col = "Segment_col"), 
@@ -377,16 +378,16 @@ We represent in the X and Y-axis the same information as before, but divided by 
 
 For our analysis, we grouped both cell lines independently without any considerations. The previous graph shows that the knockdown effects are not always consistent in both cell lines. These results could have a relevant effect in the mis-splicing ratio of introns found in the more affected genes (e.g. U2AF2, SRSF1).
 
-For example, for target gene U2AF2, the variation in TPM from <span style="background-color: #c2ffa1">control</span> to <span style="background-color: #ffaca1">cases</span> in the HepG2 cell line produces a knockdown efficiency of 1.7%, while nearly a 70% efficiency for the K562 cell line.
+<!-- For example, for target gene U2AF2, the variation in TPM from <span style="background-color: #c2ffa1">control</span> to <span style="background-color: #ffaca1">cases</span> in the HepG2 cell line produces a knockdown efficiency of 1.7%, while nearly a 70% efficiency for the K562 cell line. -->
 
-```{r app1-kEff-U2AF2, echo = F}
-metadata_TPM %>%
-  filter(target_gene == "U2AF2") %>%
-  dplyr::select(target_gene, cell_line, experiment_type, TPM, gene_quantification_id) %>%
-  arrange(cell_line, experiment_type) %>%
-  `colnames<-`(c("Target gene", "Cell line", "Cluster", "TPM", "Gene quantification ID")) %>%
-  kbl() %>%
-  kable_classic(full_width = F, html_font = "Cambria", font_size = 13) %>%
-  row_spec(1:2, color = "black", background = "#ffaca1") %>%
-  row_spec(3:4, color = "black", background = "#c2ffa1")
-```
+<!-- ```{r app1-kEff-U2AF2, echo = F} -->
+<!-- metadata_TPM %>% -->
+<!--   dplyr::filter(target_gene == "U2AF2") %>% -->
+<!--   dplyr::select(target_gene, cell_line, experiment_type, TPM, gene_quantification_id) %>% -->
+<!--   dplyr::arrange(cell_line, experiment_type) %>% -->
+<!--   `colnames<-`(c("Target gene", "Cell line", "Cluster", "TPM", "Gene quantification ID")) %>% -->
+<!--   kableExtra::kbl(booktabs = T, linesep = "") %>% -->
+<!--   kableExtra::kable_classic(full_width = F, "hover", "striped", html_font = "Cambria", font_size = 14) %>% -->
+<!--   kableExtra::row_spec(1:2, color = "black", background = "#ffaca1") %>% -->
+<!--   kableExtra::row_spec(3:4, color = "black", background = "#c2ffa1") -->
+<!-- ``` -->

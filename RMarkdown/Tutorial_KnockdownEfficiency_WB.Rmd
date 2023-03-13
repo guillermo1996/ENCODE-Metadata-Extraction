@@ -79,6 +79,8 @@ category_labels <- c("Splicing_regulation" = "Splicing regulation",
 ```
 
 ```{r theme-setup, echo = FALSE, eval = T}
+## Custom sciRmdTheme with increased width.
+## Please ask guillermorocamora@gmail.com for more details.
 sciRmdTheme::set.theme(
   theme = "default",
   color = NULL,

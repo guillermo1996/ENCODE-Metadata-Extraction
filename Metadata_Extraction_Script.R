@@ -2,6 +2,7 @@
 ## Required libraries ----
 shhh <- suppressPackageStartupMessages
 shhh(library(httr))
+shhh(library(here))
 shhh(library(jsonlite))
 shhh(library(foreach))
 shhh(library(tibble))
@@ -9,7 +10,7 @@ shhh(library(logger))
 shhh(library(tidyverse))
 
 ## Load additional helper functions ----
-source("HelperFunctions/hf_MetadataDownloadExtraction.R")
+source(here::here("Helper_Functions/hf_MetadataDownloadExtraction.R"))
 
 ## Logger options ----
 logger_layout <- logger::layout_glue_generator(format = '[{time}] [{level}] {msg}')

@@ -47,7 +47,7 @@ downloadGeneQuantifications <- function(metadata_filtered,
   
   cl <- makeCluster(download_cores)
   registerDoSNOW(cl)
-  metadata_gene_quant <- foreach(row_index = seq(nrow(metadata_filtered)), .combine = "rbind", .export = "getDownloadLinkGeneQuantification", .options.snow=opts) %dopar%{
+  metadata_gene_quant <- foreach(row_index = seq(nrow(metadata_filtered)), .export = "getDownloadLinkGeneQuantification", .options.snow=opts) %dopar%{
     row = metadata_filtered[row_index, ]
     
     ## Two possible download paths:
@@ -74,7 +74,7 @@ downloadGeneQuantifications <- function(metadata_filtered,
     }
     
     return(row)
-  }
+  } %>% dplyr::bind_rows()
   if(!silent) close(pb)
   stopCluster(cl)
   
@@ -102,13 +102,13 @@ getDownloadLinkGeneQuantification <- function(row){
 #'   the same HGCN name.
 #' @export
 translateGenes <- function(gene_list){
-  ensembl <- useMart("ensembl", dataset="hsapiens_gene_ensembl")
+  ensembl <- biomaRt::useMart("ensembl", dataset="hsapiens_gene_ensembl")
   
   
-  gene_df <- getBM(attributes = c("ensembl_gene_id", "hgnc_symbol"),
-                   filter = "hgnc_symbol",
-                   mart = ensembl,
-                   values = gene_list)
+  gene_df <- biomaRt::getBM(attributes = c("ensembl_gene_id", "hgnc_symbol"),
+                            filter = "hgnc_symbol",
+                            mart = ensembl,
+                            values = gene_list)
   
   return(gene_df)
 }
@@ -124,7 +124,7 @@ translateGenes <- function(gene_list){
 #' @return Data.frame with the TPM of the target gene for each sample.
 #' @export
 extractTPM <- function(metadata_quantifications){
-  metadata_TPM <- foreach(row_index = seq(nrow(metadata_quantifications)), .combine = dplyr::bind_rows) %do%{
+  metadata_TPM <- foreach(row_index = seq(nrow(metadata_quantifications))) %do%{
     suppressPackageStartupMessages(library(tidyverse))
     
     row = metadata_quantifications[row_index, ]
@@ -133,8 +133,9 @@ extractTPM <- function(metadata_quantifications){
     enseml_target_gene <- row$ensembl_gene_id
     
     file_path <- row$file_path
-    read_tpm <- read_delim(file_path, delim = "\t", show_col_types = F) %>%
-      filter(str_extract(gene_id, "[^.]+") %in% enseml_target_gene) %>% pull(TPM)
+    read_tpm <- readr::read_delim(file_path, delim = "\t", show_col_types = F) %>%
+      dplyr::filter(str_extract(gene_id, "[^.]+") %in% enseml_target_gene) %>% 
+      dplyr::pull(TPM)
     
     if(length(read_tpm) == 0){
       logger::log_warn("No ", target_gene, " (", enseml_target_gene, ") gene found in: ", file_path)
@@ -144,10 +145,10 @@ extractTPM <- function(metadata_quantifications){
     }
     
     return(row)
-  }
+  } %>% dplyr::bind_rows()
   
   metadata_TPM <- metadata_TPM %>%
-    filter(!is.na(TPM))
+    dplyr::filter(!is.na(TPM))
   
   return(metadata_TPM)
 }
@@ -175,20 +176,20 @@ extractTPM <- function(metadata_quantifications){
 generateKnockdownEfficiency <- function(metadata_TPM,
                                         output_file = ""){
   kEff_global <- metadata_TPM %>% 
-    group_by(target_gene, experiment_type) %>%
-    summarize(TPM_avg = mean(TPM, na.rm = T)) %>%
-    pivot_wider(target_gene, names_from = experiment_type, values_from = TPM_avg) %>%
-    mutate(kEff = (1 - case/control)*100)
+    dplyr::group_by(target_gene, experiment_type) %>%
+    dplyr::summarize(TPM_avg = mean(TPM, na.rm = T)) %>%
+    tidyr::pivot_wider(id_cols = target_gene, names_from = experiment_type, values_from = TPM_avg) %>%
+    dplyr::mutate(kEff = (1 - case/control)*100)
   
   kEff_cell_line <- metadata_TPM %>% 
-    group_by(target_gene, cell_line, experiment_type) %>%
-    summarize(TPM_avg = mean(TPM, na.rm = T)) %>%
-    pivot_wider(c(target_gene, cell_line), names_from = experiment_type, values_from = TPM_avg) %>%
-    mutate(kEff = (1 - case/control)*100) %>%
-    pivot_wider(target_gene, names_from = cell_line, values_from = kEff)
+    dplyr::group_by(target_gene, cell_line, experiment_type) %>%
+    dplyr::summarize(TPM_avg = mean(TPM, na.rm = T)) %>%
+    tidyr::pivot_wider(id_cols = c(target_gene, cell_line), names_from = experiment_type, values_from = TPM_avg) %>%
+    dplyr::mutate(kEff = (1 - case/control)*100) %>%
+    tidyr::pivot_wider(id_cols = target_gene, names_from = cell_line, values_from = kEff)
   
   metadata_kEff <- kEff_global %>% 
-    left_join(kEff_cell_line, by = "target_gene") %>%
+    dplyr::left_join(kEff_cell_line, by = "target_gene") %>%
     `colnames<-`(c("target_gene", "Avg_TPM_case", "Avg_TPM_control", "kEff", "kEff_HepG2", "kEff_K562"))
   
   if(output_file != ""){
