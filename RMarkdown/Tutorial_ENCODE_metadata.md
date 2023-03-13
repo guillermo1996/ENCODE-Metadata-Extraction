@@ -33,9 +33,10 @@
   display: none;
 }
 </style>
-<style>body {margin: 0;font-family: -apple-system,BlinkMacSystemFont,Arial,"Times New Roman", Times;font-weight: 400;line-height: 1.5;color: black!important;text-align: left;background-color: #fff;}.tocify .list-group-item {border-radius: 10px!important;}*, ::after, ::before {-webkit-box-sizing: border-box;box-sizing: border-box;}div {display: block;}.row-fluid, .main-container > .row{display: -ms-flexbox;display: -webkit-box;display: flex;-ms-flex-wrap: wrap;flex-wrap: wrap;margin-right: -15px;margin-left: -15px;}body > .row-fluid:first-child{margin-top: 100px;}.row-fluid:first-child > div:first-child, body > .main-container > .row:first-child > div:first-child{background: -o-linear-gradient(left, #fff 50%, #f8f8f8 100%)!important;background: -webkit-gradient(linear, left top, right top, color-stop(50%, #fff), to(#f8f8f8))!important;background: linear-gradient(to right, #fff 50%, #f8f8f8 100%)!important;border:0px solid gray!important;border-right:1px solid #ccc!important;-webkit-box-shadow: 1px 1px 10px 1px rgb(0 0 0 / 23%);box-shadow: 1px 1px 10px 1px rgb(0 0 0 / 23%); /* right and left only */-webkit-box-shadow: 5px 1px 11px -5px rgb(0 0 0 / 23%);box-shadow: 5px 1px 11px -5px rgb(0 0 0 / 23%); /* right only */-webkit-box-shadow: 0px 0px 0px 0px rgb(0 0 0 / 23%);box-shadow: 0px 0px 0px 0px rgb(0 0 0 / 23%); /* none */}a:hover{color:gray!important;}.list-group-item {position: relative;display: block;padding: 10px 15px;margin-bottom: -1px;background-color: transparent;border: 0px solid #ddd;}.tocify ul, .tocify li {line-height: 20px;}.tocify ul, .tocify li {list-style: none;margin: 0;padding: 0;border: none;line-height: 30px;}.tocify-header {text-indent: 10px;}.list-group {padding-left: 0;margin-bottom: 20px;}.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {z-index: 2;color: #fff;background-color: gray;border: 0px solid;}#header{background-color: #fff;border-bottom: 1px solid #ccc;padding-top: 10px;}#header .title{color: darkblue!important;}.yellow{background-color:yellow;}.red{background-color:red;}.green{background-color:green;}#headerx {position: sticky;top: 0;z-index: 999;}#headerx:before {background-image: url(headerximgurl);content: "";float: right;width: calc(100%/4);margin-top: 10px;height: 100px;background-size: cover;}.list-group-item.active:hover {opacity:0.7;}.list-group-item.active::before, .list-group-item::before {display: inline-block;font-style: normal;font-variant: normal;text-rendering: auto;-webkit-font-smoothing: antialiased;float:left;}#TOC {margin: 25px 0px 20px 0px;}div.tocify {width: 20%;max-width: 300px;max-height: 85%;}.tocify {width: 20%;max-height: 90%;overflow: auto;margin-left: 2%;position: fixed;border: 0px solid #ccc;border-radius: 6px;}.container-fluid {}.main-container{}@media (min-width: 1200px).container, .container-lg, .container-md, .container-sm, .container-xl {max-width: 1140px;}@media (min-width: 992px).container, .container-lg, .container-md, .container-sm {max-width: 960px;}@media (min-width: 768px).container, .container-md, .container-sm {max-width: 720px;}@media (min-width: 576px).container, .container-sm {max-width: 540px;}div.main-container {max-width: 1280px!important;}.container, .container-fluid, .container-lg, .container-md, .container-sm, .container-xl {width: 100%;padding-right: 15px;padding-left: 15px;margin-right: auto;margin-left: auto;}h1, .h1 {font-size: 30px!important;}h2, .h2 {font-size: 24px!important;}h3, .h3 {font-size: 18px!important;}h4, .h4 {font-size: 14px!important;}h5, .h5 {font-size: 12px!important;}h6, .h6 {font-size: 10px!important;}h4, .h4, h5, .h5, h6, .h6 {margin-top: 10px;margin-bottom: 10px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 20px;margin-bottom: 10px;}h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {font-family: inherit;font-weight: 500;line-height: 1.1;color: inherit;}h1 {margin: 0.67em 0;font-size: 2em;}.sliderimageinput,.slidertableinput, .slidertablefont {accent-color: gray;display: inline-block!important;width: 40%!important;margin-bottom: 7px;margin-top: 7px;height: 3pt!important;}.slidertableinput, .slidertablefont {width: 100%!important;}.d-flex{ display: flex; }.slidertable {border-collapse: collapse;margin: 25px 0;box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);}.slidertable th,.slidertable td {padding: 12px 15px;}.slidertable tbody tr, .slidertable tr {border-bottom: 1px solid #dddddd;}.slidertable tbody tr:nth-of-type(even), .slidertable tr:nth-of-type(even) {background-color: #f3f3f3;}.slidertable tbody tr:last-of-type, .slidertable tr:last-of-type {border-bottom: 2px solid gray;}.slidertable thead tr, .slidertable > tr {background-color: gray;color: #ffffff;text-align: left;}.font-weight-bold{font-weight:bold!important;}div.tocifyx {width: 17%!important;max-width: unset!important;max-height: 85%!important;}</style><script>function waitForElm(selector) {    return new Promise(resolve => {        if (document.querySelector(selector)) {            return resolve(document.querySelector(selector));        }        const observer = new MutationObserver(mutations => {            if (document.querySelector(selector)) {                resolve(document.querySelector(selector));                observer.disconnect();            }        });        observer.observe(document.body, {            childList: true,            subtree: true        });    });}/*wait for elements of the TOC to show*/wFEelm = '.list-group-item';waitForElm(wFEelm).then((elm) => {  $(wFEelm).prepend('<b>&#10097;&emsp;</b>');});document.addEventListener("DOMContentLoaded",function () {    /*elements with images*/    $( "p:has(img)" ).each(function(index,item){      $(this).addClass( "sliderimagep"+index);      $(this).prepend('<div class="d-flex font-weight-bold" style="font-size: 8pt">Resize image: &emsp;<input class="sliderimageinput" type="range" min="1" max="100" value="85"></div>');    });    $(".sliderimageinput").on('input',function(){      let newwidth = $(this).val();      $(this).parent().parent().children("img").each(function(index,val){        $(this).attr('width',newwidth+"%");      });    });    /*elements with tables*/    /*    $( "table" ).each(function(index,item){      $(this).addClass( "slidertable slidertable"+index);      $('<div class="d-flex font-weight-bold"><div>Resize table size:&emsp;<input class="slidertableinput" data="'+"slidertable"+index+'" type="range" min="1" max="100" value="100"></div>'+      '<div>Resize table font:&emsp;<input class="slidertablefont" type="range" min="9" data="'+"slidertable"+index+'" max="50" value="12"></div></div>').insertBefore(this);    });    $(".slidertableinput").on('input',function(){      let newwidth = $(this).val();      $("."+$(this).attr("data")).css("width",$(this).val()+"%");    });    $(".slidertablefont").on('input',function(){      let newwidth = $(this).val();      $("."+$(this).attr("data")).css("font-size",$(this).val()+"px");    });    */});</script>
 
 # 1 Introduction
+
+Print markdown_github-yaml_metadata_block
 
 In this tutorial, we will use [the ENCODE REST
 API](https://www.encodeproject.org/help/rest-api/) to automate the
@@ -213,7 +214,7 @@ information of both the case and control samples, while the experiment
 IDs only provide information for the case samples. Here is an example of
 the 10 first elements of the dataframe:
 
-<table class=" lightable-classic lightable-hover" style="font-size: 14px; font-family: Cambria; margin-left: auto; margin-right: auto;">
+<table class=" lightable-classic lightable-hover" style="font-size: 14px; font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
 <th style="text-align:left;font-weight: bold;font-size: 16px;">
@@ -475,6 +476,1157 @@ The final dataframe is stores in a .tsv file if provided in the
 
 An example of the final results can be seen in the following table:
 
+<table class=" lightable-classic lightable-hover" style="font-size: 14px; font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+target_gene
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+experiment_type
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+cell_line
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+gene_silencing_series
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+experiment_id
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+experiment_doi
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+sample_id
+</th>
+<th style="text-align:right;font-weight: bold;font-size: 16px;">
+rin
+</th>
+<th style="text-align:right;font-weight: bold;font-size: 16px;">
+read_depth
+</th>
+<th style="text-align:right;font-weight: bold;font-size: 16px;">
+bio_rep
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+tech_rep
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+sex
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+age
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+life_stage
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+gene_quantification_id
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+file_format
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+output_type
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+genome_annotation
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+mapped_run_type
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+lab
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+assay
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+cellosaurus
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+biosample
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+document
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+biosample_alias
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+nucleic_acid_type
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+extraction_method
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+fragmentation_method
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+size_selection_method
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+strand_specificity
+</th>
+<th style="text-align:right;font-weight: bold;font-size: 16px;">
+Splicing_regulation
+</th>
+<th style="text-align:right;font-weight: bold;font-size: 16px;">
+Spliceosome
+</th>
+<th style="text-align:right;font-weight: bold;font-size: 16px;">
+Exon_junction_complex
+</th>
+<th style="text-align:right;font-weight: bold;font-size: 16px;">
+NMD
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+HNRNPC
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+HepG2
+</td>
+<td style="text-align:left;">
+ENCSR308YXN
+</td>
+<td style="text-align:left;">
+ENCSR305XWT
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR305XWT
+</td>
+<td style="text-align:left;">
+ENCFF857QEU
+</td>
+<td style="text-align:right;">
+9.9
+</td>
+<td style="text-align:right;">
+22724294
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+1_1
+</td>
+<td style="text-align:left;">
+male
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:left;">
+child
+</td>
+<td style="text-align:left;">
+ENCFF570CRU
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0027
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FAM120A
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+K562
+</td>
+<td style="text-align:left;">
+ENCSR712BXM
+</td>
+<td style="text-align:left;">
+ENCSR661HEL
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR661HEL
+</td>
+<td style="text-align:left;">
+ENCFF114NYX
+</td>
+<td style="text-align:right;">
+9.3
+</td>
+<td style="text-align:right;">
+20037853
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+2_1
+</td>
+<td style="text-align:left;">
+female
+</td>
+<td style="text-align:left;">
+53
+</td>
+<td style="text-align:left;">
+adult
+</td>
+<td style="text-align:left;">
+ENCFF146WBD
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0004
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GPKOW
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+K562
+</td>
+<td style="text-align:left;">
+ENCSR888VLT
+</td>
+<td style="text-align:left;">
+ENCSR424QCW
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR424QCW
+</td>
+<td style="text-align:left;">
+ENCFF525ALF
+</td>
+<td style="text-align:right;">
+9.4
+</td>
+<td style="text-align:right;">
+27735686
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+1_1
+</td>
+<td style="text-align:left;">
+female
+</td>
+<td style="text-align:left;">
+53
+</td>
+<td style="text-align:left;">
+adult
+</td>
+<td style="text-align:left;">
+ENCFF812VKX
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0004
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ESF1
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+K562
+</td>
+<td style="text-align:left;">
+ENCSR484XYM
+</td>
+<td style="text-align:left;">
+ENCSR032YMP
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR032YMP
+</td>
+<td style="text-align:left;">
+ENCFF162FQZ
+</td>
+<td style="text-align:right;">
+9.9
+</td>
+<td style="text-align:right;">
+32549372
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+2_1
+</td>
+<td style="text-align:left;">
+female
+</td>
+<td style="text-align:left;">
+53
+</td>
+<td style="text-align:left;">
+adult
+</td>
+<td style="text-align:left;">
+ENCFF396VZW
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0004
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CPSF7
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+K562
+</td>
+<td style="text-align:left;">
+ENCSR664RDU
+</td>
+<td style="text-align:left;">
+ENCSR667PLJ
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR667PLJ
+</td>
+<td style="text-align:left;">
+ENCFF554WDW
+</td>
+<td style="text-align:right;">
+9.7
+</td>
+<td style="text-align:right;">
+16099743
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+1_1
+</td>
+<td style="text-align:left;">
+female
+</td>
+<td style="text-align:left;">
+53
+</td>
+<td style="text-align:left;">
+adult
+</td>
+<td style="text-align:left;">
+ENCFF096IBO
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0004
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RRP9
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+K562
+</td>
+<td style="text-align:left;">
+ENCSR420UVJ
+</td>
+<td style="text-align:left;">
+ENCSR661HEL
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR661HEL
+</td>
+<td style="text-align:left;">
+ENCFF114NYX
+</td>
+<td style="text-align:right;">
+9.3
+</td>
+<td style="text-align:right;">
+20037853
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+2_1
+</td>
+<td style="text-align:left;">
+female
+</td>
+<td style="text-align:left;">
+53
+</td>
+<td style="text-align:left;">
+adult
+</td>
+<td style="text-align:left;">
+ENCFF146WBD
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0004
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPS3A
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+K562
+</td>
+<td style="text-align:left;">
+ENCSR803YTK
+</td>
+<td style="text-align:left;">
+ENCSR419JMU
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR419JMU
+</td>
+<td style="text-align:left;">
+ENCFF448GQT
+</td>
+<td style="text-align:right;">
+9.8
+</td>
+<td style="text-align:right;">
+40534571
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+2_1
+</td>
+<td style="text-align:left;">
+female
+</td>
+<td style="text-align:left;">
+53
+</td>
+<td style="text-align:left;">
+adult
+</td>
+<td style="text-align:left;">
+ENCFF240MKR
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0004
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PPIG
+</td>
+<td style="text-align:left;">
+case
+</td>
+<td style="text-align:left;">
+K562
+</td>
+<td style="text-align:left;">
+ENCSR919QPP
+</td>
+<td style="text-align:left;">
+ENCSR529MBZ
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR529MBZ
+</td>
+<td style="text-align:left;">
+ENCFF999LFP
+</td>
+<td style="text-align:right;">
+10.0
+</td>
+<td style="text-align:right;">
+37116348
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+1_1
+</td>
+<td style="text-align:left;">
+female
+</td>
+<td style="text-align:left;">
+53
+</td>
+<td style="text-align:left;">
+adult
+</td>
+<td style="text-align:left;">
+ENCFF742KEN
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0004
+</td>
+<td style="text-align:left;">
+ENCLB479ITK
+</td>
+<td style="text-align:left;">
+/documents/f2485a7c-5fa3-4253-bfba-16cea47b6cc9/
+</td>
+<td style="text-align:left;">
+PPIG_BGKLV29-47
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+XRN1
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+HepG2
+</td>
+<td style="text-align:left;">
+ENCSR786TDX
+</td>
+<td style="text-align:left;">
+ENCSR225PRV
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR225PRV
+</td>
+<td style="text-align:left;">
+ENCFF085MQH
+</td>
+<td style="text-align:right;">
+9.6
+</td>
+<td style="text-align:right;">
+21601625
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+2_1
+</td>
+<td style="text-align:left;">
+male
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:left;">
+child
+</td>
+<td style="text-align:left;">
+ENCFF881HQM
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0027
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PRPF6
+</td>
+<td style="text-align:left;">
+control
+</td>
+<td style="text-align:left;">
+HepG2
+</td>
+<td style="text-align:left;">
+ENCSR196YEP
+</td>
+<td style="text-align:left;">
+ENCSR491FOC
+</td>
+<td style="text-align:left;">
+10.17989/ENCSR491FOC
+</td>
+<td style="text-align:left;">
+ENCFF055FJV
+</td>
+<td style="text-align:right;">
+9.4
+</td>
+<td style="text-align:right;">
+27706727
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+1_1
+</td>
+<td style="text-align:left;">
+male
+</td>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:left;">
+child
+</td>
+<td style="text-align:left;">
+ENCFF803IXT
+</td>
+<td style="text-align:left;">
+bam
+</td>
+<td style="text-align:left;">
+alignments
+</td>
+<td style="text-align:left;">
+V29
+</td>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+Cellosaurus:CVCL_0027
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+
 ## 3.1 Common metadata
 
 As seen in the table, every row corresponds to a sample related to both
@@ -547,6 +1699,65 @@ Other parameters that are constant across the different samples
 assay, the nucleic acid type (required), the extraction method, the
 fragmentation method, the size selection method and the strand
 specificity.
+
+<table class=" lightable-classic lightable-hover" style="font-size: 14px; font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+mapped_run_type
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+lab
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+assay
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+nucleic_acid_type
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+extraction_method
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+fragmentation_method
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+size_selection_method
+</th>
+<th style="text-align:left;font-weight: bold;font-size: 16px;">
+strand_specificity
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+paired-ended
+</td>
+<td style="text-align:left;">
+Brenton Graveley, UConn
+</td>
+<td style="text-align:left;">
+shRNA knockdown followed by RNA-seq
+</td>
+<td style="text-align:left;">
+polyadenylated mRNA
+</td>
+<td style="text-align:left;">
+Maxwell 16 LEV simpleRNA Cells Kit (Promega cat#: AS1270)
+</td>
+<td style="text-align:left;">
+chemical (Illumina TruSeq)
+</td>
+<td style="text-align:left;">
+SPRI beads
+</td>
+<td style="text-align:left;">
+reverse
+</td>
+</tr>
+</tbody>
+</table>
 
 ## 3.2 Statistics
 
@@ -714,7 +1925,6 @@ Show/hide
     ##  rstudioapi    0.14       2022-08-22 [1] RSPM (R 4.2.0)
     ##  rvest         1.0.3      2022-08-19 [1] RSPM (R 4.2.0)
     ##  scales        1.2.1      2022-08-20 [1] RSPM (R 4.2.0)
-    ##  sciRmdTheme   0.3        2023-03-10 [1] local
     ##  sessioninfo * 1.2.2      2021-12-06 [1] RSPM (R 4.2.0)
     ##  stringi       1.7.12     2023-01-11 [1] RSPM (R 4.2.0)
     ##  stringr     * 1.5.0      2022-12-02 [1] RSPM (R 4.2.0)
