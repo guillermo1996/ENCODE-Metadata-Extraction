@@ -1,4 +1,5 @@
 # ENCODE - Metadata and knockdown efficiency extraction
+[![DOI](https://zenodo.org/badge/582564324.svg)](https://zenodo.org/badge/latestdoi/582564324)
 
 This repository contains the code necessary to download and extract the ENCODE metadata for different shRNA knockdown experiments. It is designed to be easily expanded to any other experiments' categories (tested with CRISPR knockdown). 
 
