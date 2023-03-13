@@ -6,6 +6,10 @@ author:
   affiliation: UCL
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
+  md_document:
+    variant: markdown_github
+    toc: true
+    number_sections: true
   bookdown::html_document2:
     figure_caption: yes
     code_folding: show
@@ -15,10 +19,6 @@ output:
     toc: true
     toc depth: 4
     toc_float: true
-    number_sections: true
-  md_document:
-    variant: markdown_github
-    toc: true
     number_sections: true
 always_allow_html: true
 ---
@@ -415,7 +415,7 @@ metadata_WB_kEff <- metadata_WB_kEff %>%
 metadata_WB_kEff %>%
   dplyr::select(-kEff_HepG2, -kEff_K562) %>%
   `colnames<-`(c("Target gene", "Category", "kEff [%]")) %>%
-  print_df(style = knit_output, order = list(3, "desc"), limit = 20)
+  print_df(style = knit_output, order = list(2, "desc"), limit = 20)
 ```
 
 From the `r metadata_RBPs %>% pull(target_gene) %>% unique %>% length` studied projects, `r metadata_RBPs %>% left_join(metadata_WB_kEff %>% select(target_gene, kEff_avg), by = "target_gene") %>% filter(is.na(kEff_avg)) %>% pull(target_gene) %>% unique %>% length` of them had no available information for any of the two cell lines. The average knockdown efficiency is `r metadata_WB_kEff$kEff_avg %>% mean(na.rm = T) %>% round(1)`%, ranging from `r metadata_WB_kEff$kEff_avg %>% min(na.rm = T) %>% round(1)` to `r metadata_WB_kEff$kEff_avg %>% max(na.rm = T) %>% round(1)`% in some cases. In the following visualization, we represent in the X-axis the knockdown efficiency for every studied target RBP/NMD, split by their functional category:
@@ -447,7 +447,7 @@ ggplot(kEff_df) +
 
 ## Cell line influence
 
-In some cases, the difference in $kEff$ between the two cell lines is not irrelevant. In the following table and graph, we show the $kEff$ for each cell line and the difference between the two:
+In some cases, the difference in `kEff` between the two cell lines is not irrelevant. In the following table and graph, we show the `kEff` for each cell line and the difference between the two:
 
 ```{r kEff-cell_line, echo = F}
 metadata_WB_kEff %>%
@@ -455,7 +455,7 @@ metadata_WB_kEff %>%
   dplyr::select(-kEff_avg) %>%
   `colnames<-`(c("Target gene", "Category", "HepG2 kEff [%]", "K562 kEff [%]", "Difference abs(HepG2 - K562)")) %>%
   dplyr::mutate(across(where(is.numeric), round, 1)) %>%
-  print_df(style = knit_output, order = list(5, "desc"), limit = 10)
+  print_df(style = knit_output, order = list(4, "desc"), limit = 10)
 ```
 
 ```{r kEff-cell_line-graph, echo = F, fig.height=12, fig.width=7.2, dpi = 300}
