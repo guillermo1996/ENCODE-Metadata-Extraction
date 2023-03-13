@@ -2,6 +2,7 @@
 RBPs/*
 *.log
 *.json
+Knockdown_Efficiency/WesternBlotting_PCR/RBPs
 
 # History files
 .Rhistory

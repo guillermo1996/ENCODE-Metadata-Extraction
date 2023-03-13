@@ -1,32 +1,38 @@
-## Required libraries
-library(logger)
-library(foreach)
-library(doSNOW)
-suppressPackageStartupMessages(library(tidyverse))
-suppressPackageStartupMessages(library(reticulate))
+# 1. Load libraries and variables ----
+## Required libraries ----
+shhh <- suppressPackageStartupMessages
+shhh(library(here))
+shhh(library(logger))
+shhh(library(foreach))
+shhh(library(doSNOW))
+shhh(library(tidyverse))
+shhh(library(reticulate))
 
-## Load additional helper functions
-source("helperFunctions.R")
+## Load additional helper functions ----
+source(here::here("Helper_Functions/hf_KnockdownEfficiency_WB.R"))
 
-## Load python interface
+## Load python interface ----
 use_virtualenv("UCL")
 pytesseract <- import("pytesseract")
 PIL <- import("PIL")
 
-## Files
-metadata_path <- "../Metadata_results/metadata_samples.tsv"
-metadata_WB_output <- "../Metadata_results/metadata_WB_kEff.tsv"
-metadata_PCR_output <- "../Metadata_results/metadata_PCR_kEff.tsv"
-metadata <- readr::read_delim(metadata_path, show_col_types = F) %>% as_tibble()
+## Input Files ----
+main_metadata_path <- here::here("Metadata_Results/")
+metadata_path <- paste0(main_metadata_path, "metadata_samples.tsv")
+metadata_WB_output <- paste0(main_metadata_path, "metadata_WB_kEff.tsv")
+metadata_PCR_output <- paste0(main_metadata_path, "metadata_PCR_kEff.tsv")
 
-## Define the algorithm variables
-main_path = "RBPs/"
+## Define the algorithm variables ----
+main_path = here::here("Knockdown_Efficiency/WesternBlotting_PCR/RBPs/")
 download_cores = 16
 overwrite_results = F
 resize_perc = 0.25
 min_width = 600
 
-## Generate the variables
+# 2. Pipeline ----
+## Generate the variables ----
+metadata <- readr::read_delim(metadata_path, show_col_types = F) %>% as_tibble()
+
 target_RBPs <- metadata %>%
   dplyr::filter(if_any(c(Splicing_regulation, Spliceosome, Exon_junction_complex, NMD), ~ . != 0)) %>%
   dplyr::filter(!is.na(document)) %>%
@@ -37,33 +43,36 @@ metadata_filtered <- metadata %>%
   dplyr::filter(target_gene %in% target_RBPs, !is.na(document)) %>%
   dplyr::select(target_gene, cell_line, experiment_id, biosample, bio_rep, document, biosample_alias) %>%
   dplyr::mutate(path = paste0(main_path, target_gene, "/", experiment_id, "/", bio_rep, "/"))
-
-## Create the directories
+ 
+## Create the directories ----
 createDirectories(target_RBPs, metadata_filtered)
 
-## Download the files and add a column with their path
+## Download the files and add a column with their path ----
 metadata_documents <- downloadCharacterizationDocuments(metadata_filtered, 
                                                         download_cores, 
                                                         overwrite_results,
                                                         silent = F)
 
-## Check the existence of the files
+## Check the existence of the files ----
 for(row_index in seq(nrow(metadata_documents))){
   row = metadata_documents[row_index, ]
   file_path <- row$file_path
   path <- row$path
   
-  if(!file.exists(file_path) || file.info(file_path)$size < 10) logger::log_warn("Error for row ", row_index, "! File path ", path)
+  if(!file.exists(file_path) || file.info(file_path)$size < 10){
+    logger::log_warn("Error for row ", row_index, "! File path ", path)
+  }
 }
 
-## Extract the images of all files
+## Extract the images of all files ----
 metadata_images <- extractImages(metadata_documents, 
                                  overwrite_results = overwrite_results)
 
-## Extract text from images. This cannot be separated into an external function.
+## Extract text from images ----
+## This cannot be separated into an external function.
 ## Probably because of some incompatibility with the reticulate library to use
 ## python.
-metadata_kEff <- foreach(row_index = seq(nrow(metadata_images)), .combine = dplyr::bind_rows) %do%{
+metadata_kEff <- foreach(row_index = seq(nrow(metadata_images))) %do%{
   row = metadata_images[row_index, ]
   path <- row$path
   image_path <- row$image_path
@@ -117,9 +126,9 @@ metadata_kEff <- foreach(row_index = seq(nrow(metadata_images)), .combine = dply
   }
   
   return(row)
-}
+} %>% dplyr::bind_rows()
 
-## Test for consistency between the cell lines
+## Test for consistency between the cell lines ----
 for(target_RBP in target_RBPs){
   metadata_RBP <- metadata_kEff %>%  filter(target_gene == target_RBP)
   WB_HepG2 <- metadata_RBP$WB_HepG2
@@ -134,6 +143,6 @@ for(target_RBP in target_RBPs){
   if(length(unique(na.omit(PCR_K562))) > 1) logger::ERROR("Error in RBP ", target_RBP, " cell line K562, method PCR.")
 }
 
-## Write the knockdown efficiency table to disk
+## Write the knockdown efficiency table to disk ----
 writeEfficiencyTable(metadata_kEff, "WB", metadata_WB_output)
 writeEfficiencyTable(metadata_kEff, "PCR", metadata_PCR_output)

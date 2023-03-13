@@ -11,7 +11,9 @@ createDirectories <- function(target_RBPs,
                               metadata_filtered){
   for(i in seq(length(target_RBPs))){
     target_RBP <- target_RBPs[i]
-    RBP_metadata <- metadata_filtered %>% dplyr::filter(target_gene == target_RBP)
+    RBP_metadata <- metadata_filtered %>% 
+      dplyr::filter(target_gene == target_RBP)
+    
     for (row in seq(nrow(RBP_metadata))) {
       document.path <- RBP_metadata[row, "path", T]
       dir.create(document.path, recursive = T, showWarnings = F)
@@ -50,7 +52,7 @@ downloadCharacterizationDocuments <- function(metadata_filtered,
   
   cl <- makeCluster(download_cores)
   registerDoSNOW(cl)
-  metadata_documents <- foreach(row_index = seq(nrow(metadata_filtered)), .combine = "rbind", .options.snow=opts) %dopar%{
+  metadata_documents <- foreach(row_index = seq(nrow(metadata_filtered)), .options.snow=opts) %dopar%{
     row = metadata_filtered[row_index, ]
     
     ## Two possible download paths:
@@ -75,14 +77,14 @@ downloadCharacterizationDocuments <- function(metadata_filtered,
           file.remove(file_path)
         })
       })
-    }
+    } 
     
     if(!file.exists(file_path) || file.info(file_path)$size < 10){
       row$file_path <- NA
     }
     
     return(row)
-  }
+  } %>% dplyr::bind_rows()
   if(!silent) close(pb)
   stopCluster(cl)
   
@@ -105,7 +107,7 @@ downloadCharacterizationDocuments <- function(metadata_filtered,
 #' @export
 extractImages <- function(metadata_documents,
                           overwrite_results = FALSE){
-  metadata_images <- foreach(row_index = seq(nrow(metadata_documents)), .combine = dplyr::bind_rows) %do%{
+  metadata_images <- foreach(row_index = seq(nrow(metadata_documents))) %do%{
     row = metadata_documents[row_index, ]
     
     biosample = row$biosample
@@ -142,7 +144,7 @@ extractImages <- function(metadata_documents,
     
     row$image_path <- image_path 
     row
-  }
+  } %>% dplyr::bind_rows()
   
   return(metadata_images)
 }

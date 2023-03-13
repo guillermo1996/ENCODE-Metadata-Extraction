@@ -1,5 +1,6 @@
 ---
-title: "WB/qt-PCR Knockdown efficiency extraction"
+title: "Knockdown Efficiency extraction"
+subtitle: "WB/qt-PCR from ENCODE"
 author: 
 - name: "Guillermo Rocamora Pérez"
   affiliation: UCL
@@ -117,11 +118,11 @@ In this tutorial, we will focus on downloading and extracting the reported knock
 
 # Methods
 
-First, we needed a list of target RBPs to study. As with the previous studies, we will employ the list of 356 RBPs published by Nostrand et al. which has been categorized as splicing regulation, spliceosome or exon-junction complex. We also added a list of 118 genes classified as involved in nononsense-mediated decay processes. In total, 56 of those genes were found as ENCODE projects with the same number of experiments and similar metadata.
+First, we needed a list of target RBPs to study. As with the previous studies, we will employ the list of 356 RBPs published by *Van Nostrand et. al.* [A large-scale binding and functional map of human RNA-binding proteins](https://www.nature.com/articles/s41586-020-2077-3) categorized as splicing regulation, spliceosome or exon-junction complex. We also added a list of 118 genes classified as involved in nononsense-mediated decay processes. In total, 56 of those genes were found as ENCODE projects with the same number of experiments and similar metadata.
 
-For most experiments (being an experiment a collection of 2 isogenic replicates for one cell line and experiment type), the knockdown efficiency is reported in their *Graveley Lab shRNA knockdown followed by RNA-seq Biosample Preparation and Characterization Document* (see [example](https://www.encodeproject.org/documents/e5391dd5-cf87-451c-97e0-fe9967170285/@@download/attachment/U2AF2-LV08-64.pdf)). They use two alternative techniques to evaluate the efficiency: qRT-PCR and Western blotting.
+For most experiments (being an experiment a collection of 2 isogenic replicates for one cell line and experiment type), the knockdown efficiency is reported in their *Graveley Lab shRNA knockdown followed by RNA-seq Biosample Preparation and Characterization Document* (see [example](https://www.encodeproject.org/documents/e5391dd5-cf87-451c-97e0-fe9967170285/@@download/attachment/U2AF2-LV08-64.pdf)). They applied two alternative techniques to evaluate the efficiency: qRT-PCR and Western blotting.
 
-In both situations, they measure the depletion level in the shRNA treated sample against a control non-target shRNA sample. The depletion is normalized using the gene GAPDH as a control. The technique we are most interested in is the Western blotting, a powerful and important procedure to analyse the detection of proteins, particularly in low abundance [@KURIEN2006283]. As such, it represents the actual concentration of protein in the sample and not the RNA abundance.
+In both situations, they measure the depletion level in the shRNA treated sample against a control non-target shRNA sample. The depletion is normalized using the gene GAPDH as a control. The technique we are most interested in is the Western blotting, a powerful and important procedure to analyse the detection of proteins, particularly in low abundance. As such, it represents the actual concentration of protein in the sample and not the RNA abundance.
 
 The main procedure to obtain the reported knockdown efficiency for a particular experiment is the following:
 
@@ -156,7 +157,7 @@ For this tutorial, we need to install the [Tesseract-OCR](https://github.com/tes
 
 Therefore, we need to load the necessary libraries and helper functions:
 
-```{r}
+```{r, echo = T}
 # Required libraries
 library(logger)
 library(foreach)
@@ -165,7 +166,7 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(reticulate))
 
 # Load additional helper functions
-source("helperFunctions.R")
+source(here::here("Helper_Functions/hf_KnockdownEfficiency_WB.R"))
 
 # Load python interface
 use_virtualenv("UCL")
@@ -179,19 +180,21 @@ First, we specify where the input metadata is located and where the output files
 
 ```{r}
 # Files
-metadata_path <- "../Metadata_results/metadata_samples.tsv"
-metadata_WB_output <- "../Metadata_results/metadata_WB_kEff.tsv"
-metadata_PCR_output <- "../Metadata_results/metadata_PCR_kEff.tsv"
-metadata <- readr::read_delim(metadata_path, show_col_types = F) %>% as_tibble()
+main_metadata_path <- here::here("Metadata_Results/")
+metadata_path <- paste0(main_metadata_path, "metadata_samples.tsv")
+metadata_WB_output <- paste0(main_metadata_path, "metadata_WB_kEff.tsv")
+metadata_PCR_output <- paste0(main_metadata_path, "metadata_PCR_kEff.tsv")
 
 # Define the algorithm variables
-main_path = "RBPs/"
+main_path = here::here("Knockdown_Efficiency/WesternBlotting_PCR/RBPs/")
 download_cores = 16
 overwrite_results = F
 resize_perc = 0.25
 min_width = 600
 
 # Generate the variables
+metadata <- readr::read_delim(metadata_path, show_col_types = F) %>% as_tibble()
+
 target_RBPs <- metadata %>%
   dplyr::filter(if_any(c(Splicing_regulation, Spliceosome, Exon_junction_complex, NMD), ~ . != 0)) %>%
   dplyr::filter(!is.na(document)) %>%
@@ -199,11 +202,11 @@ target_RBPs <- metadata %>%
   unique()
 
 metadata_RBPs <- metadata %>% 
-  filter(target_gene %in% target_RBPs) %>%
-  pivot_longer(c("Splicing_regulation", "Spliceosome", "Exon_junction_complex", "NMD"), names_to = "Category") %>%
-  filter(value == 1) %>%
-  select(-value) %>%
-  distinct(target_gene, sample_id, .keep_all = T)
+  dplyr::filter(target_gene %in% target_RBPs) %>%
+  tidyr::pivot_longer(c("Splicing_regulation", "Spliceosome", "Exon_junction_complex", "NMD"), names_to = "Category") %>%
+  dplyr::filter(value == 1) %>%
+  dplyr::select(-value) %>%
+  dplyr::distinct(target_gene, sample_id, .keep_all = T)
 
 metadata_filtered <- metadata %>%
   dplyr::filter(target_gene %in% target_RBPs, !is.na(document)) %>%
@@ -215,11 +218,11 @@ metadata_filtered <- metadata %>%
 
 Next step is to generate the subfolder structures where the biosample characterization files will be stored (by default `main_path/target_gene/experiment_id/biosample_replicate/`). We use the function `downloadCharacterizationDocuments()` to download the documents into the specified paths. 
 
-```{r}
-## Create the directories
+```{r, echo = T}
+# Create the directories
 createDirectories(target_RBPs, metadata_filtered)
 
-## Download the files and add a column with their path
+# Download the files and add a column with their path
 metadata_documents <- downloadCharacterizationDocuments(metadata_filtered, 
                                                         download_cores, 
                                                         overwrite_results,
@@ -228,15 +231,16 @@ metadata_documents <- downloadCharacterizationDocuments(metadata_filtered,
 
 It is recommended to test for the existence of the documents, since it is possible that some experiments have their documents file names modified, or they might not be available to download.
 
-```{r}
+```{r, echo = T}
 # Check the existence of the files
 for(row_index in seq(nrow(metadata_documents))){
   row = metadata_documents[row_index, ]
   file_path <- row$file_path
-  experiment_id <- row$experiment_id
   path <- row$path
   
-  if(!file.exists(file_path) || file.info(file_path)$size < 10) cat(paste0("Error for row ", row_index, " experiment ", experiment_id, "! File path ", path, "\n"))
+  if(!file.exists(file_path) || file.info(file_path)$size < 10){
+    logger::log_warn("Error for row ", row_index, "! File path ", path)
+  }
 }
 ```
 
@@ -244,7 +248,7 @@ for(row_index in seq(nrow(metadata_documents))){
 
 Once we have all characterization documents available, we use the python package [PyMuPDF](https://pymupdf.readthedocs.io/en/latest/) version 1.21.1. The function `extractImages()` extract the images and keeps only the last one, which contains the reported efficiency for both methods.
 
-```{r}
+```{r, echo = T}
 # Extract the images of all files
 metadata_images <- extractImages(metadata_documents, 
                                  overwrite_results = overwrite_results)
@@ -256,11 +260,11 @@ The next step is to process the images from the step above and to extract the wr
 
 Since there are two types of images, we need to consider both scenarios, differenciated by the number of columns that tesseract-OCR reads from the image. The efficiencies are extracted and combined per cell line (i.e. two efficiencies are provided per cell line, but the average is reported). If no valid efficiency is extracted from the image, an `NA` is returned instead:
 
-```{r}
+```{r, echo = T}
 # Extract text from images. This cannot be separated into an external function.
 # Probably because of some incompatibility with the reticulate library to use
 # python.
-metadata_kEff <- foreach(row_index = seq(nrow(metadata_images)), .combine = dplyr::bind_rows) %do%{
+metadata_kEff <- foreach(row_index = seq(nrow(metadata_images))) %do%{
   row = metadata_images[row_index, ]
   path <- row$path
   image_path <- row$image_path
@@ -306,7 +310,7 @@ metadata_kEff <- foreach(row_index = seq(nrow(metadata_images)), .combine = dply
     row$PCR_HepG2 <- ifelse(row$cell_line == "HepG2", kEff_df %>% dplyr::filter(method != "Western") %>% dplyr::pull(cell_line), NA)
     row$PCR_K562 <- ifelse(row$cell_line == "K562", kEff_df %>% dplyr::filter(method != "Western") %>% dplyr::pull(cell_line), NA)
   }else{
-    print(paste0("Error in row ", row_index, ". Columns are not valid"))
+    logger::WARN("Error in row ", row_index, ". Columns are not valid")
     row$WB_HepG2 <- NA
     row$WB_K562 <- NA
     row$PCR_HepG2 <- NA
@@ -314,12 +318,12 @@ metadata_kEff <- foreach(row_index = seq(nrow(metadata_images)), .combine = dply
   }
   
   return(row)
-}
+} %>% dplyr::bind_rows()
 ```
 
 An important step is to test for consistency between the returned efficiencies. In many experiments, each sample's document reports the efficiency for the whole target gene. As such, the same image is processed up to 4 times per target gene. It is important to test that all iterations of the same image returns the same output:
 
-```{r}
+```{r, echo = T}
 # Test for consistency between the cell lines
 for(target_RBP in target_RBPs){
   metadata_RBP <- metadata_kEff %>%  filter(target_gene == target_RBP)
@@ -328,11 +332,11 @@ for(target_RBP in target_RBPs){
   PCR_HepG2 <- metadata_RBP$PCR_HepG2
   PCR_K562 <- metadata_RBP$PCR_K562
   
-  if(length(unique(na.omit(WB_HepG2))) > 1) print(paste0("Error in RBP ", target_RBP, " cell line HepG2, method WB."))
-  if(length(unique(na.omit(WB_K562))) > 1) print(paste0("Error in RBP ", target_RBP, " cell line K562, method WB."))
+  if(length(unique(na.omit(WB_HepG2))) > 1) logger::ERROR("Error in RBP ", target_RBP, " cell line HepG2, method WB.")
+  if(length(unique(na.omit(WB_K562))) > 1) logger::ERROR("Error in RBP ", target_RBP, " cell line K562, method WB.")
   
-  if(length(unique(na.omit(PCR_HepG2))) > 1) print(paste0("Error in RBP ", target_RBP, " cell line HepG2, method PCR."))
-  if(length(unique(na.omit(PCR_K562))) > 1) print(paste0("Error in RBP ", target_RBP, " cell line K562, method PCR."))
+  if(length(unique(na.omit(PCR_HepG2))) > 1) logger::ERROR("Error in RBP ", target_RBP, " cell line HepG2, method PCR.")
+  if(length(unique(na.omit(PCR_K562))) > 1) logger::ERROR("Error in RBP ", target_RBP, " cell line K562, method PCR.")
 }
 ```
 
@@ -340,7 +344,7 @@ for(target_RBP in target_RBPs){
 
 From the reported efficiencies for each cell line, we calculate the average of them as the reported knockdown efficiency for a particular target gene. These reported efficiencies are stored for both Western blot and qRT-PCR.
 
-```{r}
+```{r, echo = T}
 # Write the knockdown efficiency table to disk
 metadata_WB_kEff <- writeEfficiencyTable(metadata_kEff, "WB", metadata_WB_output)
 metadata_PCR_kEff <- writeEfficiencyTable(metadata_kEff, "PCR", metadata_PCR_output)
@@ -354,13 +358,15 @@ In the following table, we can observe the obtained knockdown efficiencies for e
 
 ```{r tpm-table, echo = F}
 metadata_WB_kEff <- metadata_WB_kEff %>%
-  left_join(metadata_RBPs %>% select(target_gene, Category) %>% distinct(),
-            by = "target_gene") %>%
-  relocate(Category, .after = target_gene) %>%
-  filter(!is.na(kEff_avg))
+  dplyr::left_join(metadata_RBPs %>% 
+                     dplyr::select(target_gene, Category) %>% 
+                     dplyr::distinct(),
+                   by = "target_gene") %>%
+  dplyr::relocate(Category, .after = target_gene) %>%
+  dplyr::filter(!is.na(kEff_avg))
 
 metadata_WB_kEff %>%
-  select(-kEff_HepG2, -kEff_K562) %>%
+  dplyr::select(-kEff_HepG2, -kEff_K562) %>%
   `colnames<-`(c("Target gene", "Category", "kEff [%]")) %>%
   prettier_DT(order = 3)
 ```
@@ -369,9 +375,9 @@ From the `r metadata_RBPs %>% pull(target_gene) %>% unique %>% length` studied p
 
 ```{r kEff-category-graph, echo = F, fig.height=9, fig.width=7.2, dpi = 300}
 kEff_df <- metadata_WB_kEff %>%
-  arrange(-kEff_avg) %>%
-  mutate(target_gene = factor(target_gene, levels = .$target_gene),
-         Category = factor(Category, levels = c("Splicing_regulation", "Spliceosome", "NMD", "Exon_junction_complex")))
+  dplyr::arrange(-kEff_avg) %>%
+  dplyr::mutate(target_gene = factor(target_gene, levels = .$target_gene),
+                Category = factor(Category, levels = c("Splicing_regulation", "Spliceosome", "NMD", "Exon_junction_complex")))
 
 ggplot(kEff_df) +
   geom_bar(aes(x = target_gene, y = kEff_avg, fill = Category), stat = "identity", color = "black", linewidth = 0.25, width = 0.8) +
@@ -398,20 +404,20 @@ In some cases, the difference in $kEff$ between the two cell lines is not irrele
 
 ```{r kEff-cell_line, echo = F}
 metadata_WB_kEff %>%
-  mutate(Diff = abs(kEff_HepG2 - kEff_K562)) %>%
-  select(-kEff_avg) %>%
+  dplyr::mutate(Diff = abs(kEff_HepG2 - kEff_K562)) %>%
+  dplyr::select(-kEff_avg) %>%
   `colnames<-`(c("Target gene", "Category", "HepG2 kEff [%]", "K562 kEff [%]", "Difference abs(HepG2 - K562)")) %>%
-  mutate(across(where(is.numeric), round, 1)) %>%
+  dplyr::mutate(across(where(is.numeric), round, 1)) %>%
   prettier_DT(order = 5)
 ```
 
 ```{r kEff-cell_line-graph, echo = F, fig.height=12, fig.width=7.2, dpi = 300}
 kEff_df <- metadata_WB_kEff %>%
-  mutate(Diff = abs(kEff_HepG2 - kEff_K562)) %>%
-  arrange(-kEff_HepG2) %>%
-  mutate(target_gene = factor(target_gene, levels = .$target_gene),
-         Category = factor(Category, levels = c("Splicing_regulation", "Spliceosome", "NMD", "Exon_junction_complex")),
-         type = ifelse(kEff_HepG2 > kEff_K562, "HepG2", "K562"))
+  dplyr::mutate(Diff = abs(kEff_HepG2 - kEff_K562)) %>%
+  dplyr::arrange(-kEff_HepG2) %>%
+  dplyr::mutate(target_gene = factor(target_gene, levels = .$target_gene),
+                Category = factor(Category, levels = c("Splicing_regulation", "Spliceosome", "NMD", "Exon_junction_complex")),
+                type = ifelse(kEff_HepG2 > kEff_K562, "HepG2", "K562"))
 
 ggplot(kEff_df) +
   geom_segment(aes(x = target_gene, y = kEff_HepG2, yend = kEff_K562, xend = target_gene, col = "Segment_col"), 
