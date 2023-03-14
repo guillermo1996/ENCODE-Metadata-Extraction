@@ -3,7 +3,7 @@
 
 This repository contains the code necessary to download and extract the ENCODE metadata for different shRNA knockdown experiments. It is designed to be easily expanded to any other experiments' categories (tested with CRISPR knockdown). 
 
-Provided are a standalone script ([Metadata_Extraction_Script.R](Metadata_Extraction_Script.R)) and a detailed tutorial ([Tutorial_ENCODE_metadata.html](https://guillermo1996.github.io/ENCODE_Metadata_Extraction/RMarkdown/Tutorial_ENCODE_metadata.html)).
+Provided is a standalone script ([Metadata_Extraction_Script.R](Metadata_Extraction_Script.R)) and a detailed tutorial ([Tutorial_ENCODE_metadata.html](https://guillermo1996.github.io/ENCODE_Metadata_Extraction/RMarkdown/Tutorial_ENCODE_metadata.html)).
 
 Additionally, two different tutorials are also available to estimate/extract the knockdown efficiency:
 
